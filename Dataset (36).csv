@@ -1,0 +1,426 @@
+Audio File,Summarise Audio Call,quality,quality-reason,transcription_eval,transcription_eval-reason,tone,tone-reason
+https://fi-content-dev.s3.ap-south-1.amazonaws.com/audio/fbb461ac-33ec-455b-9aca-073dd68a6995/daaa0128-b34e-451c-96b2-4f6d69a5b58b,"The transcription of the audio call is as follows:
+
+Customer Support: ""Thank you for calling BrownBox customer support. My name is Rachel, how may I assist you today?""
+Customer: ""Hi Rachel, I am calling to inquire about the delivery of my refrigerator. It was supposed to be delivered last week, but it hasn't arrived yet.""
+Customer Support: ""I'm sorry to hear that and I understand how frustrating that can be. May I have your order number please?""
+Customer: ""Yes, it's 123456.""
+(Customer Support checks the status)
+Customer Support: ""I see that your refrigerator is still in transit and hasn't arrived at the local delivery center yet. I apologize for the delay; we are experiencing some logistical issues due to the pandemic, but we are doing everything we can to get your order to you as soon as possible.""
+Customer: ""This is unacceptable. I was promised that my refrigerator would be delivered last week and now I have to wait even longer? I need it urgently.""
+(Customer Support takes a few minutes)
+Customer Support: ""I completely understand your frustration and I apologize for the inconvenience. Let me see what I can do to expedite the delivery."" 
+(Customer Support contacts delivery team) 
+""I have contacted our delivery team and they have assured me that your refrigerator will be delivered within the next 48 hours. Additionally, I've applied a $50 credit to your account for any inconvenience caused.""
+Customer: ""Thank you Rachel, I appreciate your efforts. Can you confirm the delivery date and time?""
+Customer Support: ""Yes, I can confirm that your refrigerator will be delivered on Thursday between 10 AM and 2 PM. Is there anything else with which I could assist you?""
+Customer: “No that's all for now thank you for your help.”
+(Customer ends call)
+""You're welcome! And again I'm sorry about this delay if there's any other questions or concerns don't hesitate reaching out okay? Have great day!""
+""You too goodbye!""",1.0,"The final score is based on a comprehensive review of the audio, which aligns perfectly with the initial detailed analysis.
+
+*   **Technical Quality:** The recording is technically flawless. There is a complete absence of background noise, hiss, hum, or any digital artifacts. The audio is exceptionally clean, indicating a professional studio environment and high-quality equipment.
+*   **Clarity and Pronunciation:** Both speakers exhibit perfect clarity and enunciation. Every word is crisp, distinct, and easily intelligible. The pronunciation is impeccable, with no errors or slurring.
+*   **Intonation and Expressiveness:** This is the audio's strongest attribute. The voice acting is outstanding. The customer's emotional journey from inquiry to credible frustration (e.g., at 00:38, ""This is unacceptable!"") and then to relief is conveyed with remarkable naturalness. The support agent's tone is consistently empathetic and professional, adapting perfectly to the situation.
+*   **Overall Performance:** The dialogue flows with authentic pacing and prosody, creating a highly believable and engaging interaction. The combination of pristine technical quality and superb vocal performance meets the criteria for professional excellence.
+
+Given that the audio exhibits no discernible flaws and demonstrates an outstanding level of performance, it serves as a benchmark for the highest quality, making a score of 1.0 the only appropriate choice.",0.2,"The final score is based on a comprehensive review of the provided analysis, which identifies numerous critical errors across all evaluation dimensions. The transcription quality is poor and falls significantly below professional standards.
+
+*   **Critical Omissions and Substitutions:** The transcription omits entire spoken sentences (e.g., at 00:20, ""Let me check the status of your order."") and replaces them with inaccurate parenthetical actions. The final word of the conversation (""Goodbye"" at 01:32) is also completely missing.
+*   **Pervasive Punctuation and Formatting Errors:** There is a systemic failure in punctuation, including entire sentences lacking any punctuation (01:17), the incorrect use of a question mark that changes a statement into a question (00:43), and inappropriate exclamation marks (01:30).
+*   **Semantic and Contextual Misrepresentation:** The transcription fundamentally misrepresents the speaker's intent by altering punctuation. It also includes factually incorrect temporal tags, such as `(Customer ends call)` while the agent is still speaking (01:20), demonstrating a severe lack of contextual understanding.
+*   **Word-Level Inaccuracy:** Multiple instances of incorrect word choice and phrasing significantly alter the original dialogue. For example, the natural phrase ""assist you with"" is replaced with the stilted and inaccurate ""with which I could assist you"" (01:14), and the agent's professional closing is replaced with a sloppy, inaccurate paraphrase (01:20).
+
+These combined errors severely compromise the transcription's reliability and accuracy, justifying a score of 0.2.","['neutral', 'annoyance', 'anger']","The text contains multiple distinct emotional tones that are assigned.
+
+*   **Neutral** is present in the professional and polite language used throughout the interaction. 
+    *   This is established by the agent's standard greeting, ""*Thank you for calling Brown Box customer support*,"" and closing, ""*Have a great day*.""
+    *   It is also seen in the customer's factual responses, such as providing the order number, and in the polite conclusion, ""*Thank you Rachel. I appreciate your efforts*.""
+
+*   **Annoyance** is clearly expressed by the customer regarding the delayed delivery.
+    *   Evidence includes statements of frustration like, ""*It was supposed to be delivered last week, but it hasn't arrived yet*,"" and exasperation, ""*...and now I have to wait even longer*.""
+    *   The agent directly acknowledges this emotion by stating, ""*I understand how frustrating that can be*.""
+
+*   **Anger** is assigned due to the customer's emotional escalation beyond simple annoyance.
+    *   The statement, ""*This is unacceptable*,"" is a direct and strong expression of displeasure, indicating a peak level of anger.
+
+*   Other emotions like joy, sadness, and fear are not selected as there is no textual evidence to support their presence."
+https://fi-content-dev.s3.ap-south-1.amazonaws.com/audio/fbb461ac-33ec-455b-9aca-073dd68a6995/3b994138-7801-4860-9357-5c879f47f776,"Hi, I have a query regarding my account.
+Hello. Thank you for contacting BrownBox customer support. I'm here to assist you. May I please have your name and email address so I can access your account?
+Sure, my name is John, and my email address is john@gmail.com.
+Thank you, John. How may I assist you today?
+I want to purchase a refrigerator but I'm not sure if I need an account to do so.
+Yes, John, you would need to create an account to make a purchase on our website. It's a simple process and you can do it by clicking on the ""Sign Up"" button on the top right corner of our homepage.
+Okay, I'll create an account then. But I have another question; do I need to provide any additional information to purchase the refrigerator?
+Yes, John, you would need to provide your shipping address and payment information during the checkout process. We also recommend that you provide a valid phone number and email address so we can contact you if needed.
+Alright, I understand. But what if I want to return the refrigerator? What's your return policy?
+Our return policy allows you to return the refrigerator within 30 days of the delivery date. However, please note that some products may have different return policies so it's always a good idea to check the product page for specific details.
+That's good to know! Thank you for your help!
+You're welcome, John! Is there anything else I can assist you with today?
+Nope that's all thankyou again
+It was my pleasure assisting You john Have A great day",0.8,"markdown
+*   The audio quality is excellent, featuring professional-grade performances from both speakers and a very clean recording. The dialogue is perfectly clear, natural, and expressive.
+*   The core strengths are flawless clarity, perfect pronunciation, and natural, engaging intonation. The conversational flow is authentic, and both the male agent and female customer sound convincing in their roles.
+*   The audio is prevented from receiving a perfect 1.0 score by the presence of two minor technical imperfections: a very faint, non-distracting background hiss/room tone, and isolated instances of minor sibilance (e.g., on the word ""assist"" at 0:07).
+*   These issues are trivial and do not detract from the listener's experience or the overall professional quality. This aligns perfectly with the definition for a 0.8 score: ""very high quality with only minor issues that do not significantly impact overall performance.""
+",0.8,"The final score is based on a comprehensive review of the transcription's quality, which is overwhelmingly high but contains a concentrated set of minor errors at the conclusion.
+
+*   **Word-Level Accuracy:** The transcription is nearly perfect, with the exception of a single word substitution at the end (""Nope"" for ""No"").
+*   **Contextual & Semantic Integrity:** The transcription demonstrates superior contextual understanding by correctly capitalizing brand names (""BrownBox""), identifying UI elements (""Sign Up""), and using punctuation to convey tone (exclamation points). The overall meaning of the conversation is perfectly preserved.
+*   **Punctuation & Formatting:** While excellent for the first 90% of the dialogue, the quality drops significantly in the final two lines. This section contains numerous errors, including:
+    *   Missing commas and periods.
+    *   Incorrect word formatting (""thankyou"" instead of ""thank you"").
+    *   Inconsistent capitalization (lowercase ""john"", incorrectly capitalized ""You"", ""Have"", ""A"").
+
+Given that the transcription is of professional-grade quality with errors that are minor, isolated, and do not impact understanding, a score of **0.8** is the most accurate reflection of its quality. It is clearly above average but falls just short of the flawless standard required for a 1.0.",['neutral'],"The final assignment is based on the consistently polite, factual, and informational nature of the entire dialogue.
+- The interaction is a standard customer service call focused on gathering information, as seen in phrases like `""I have a query regarding my account""` and `""What's your return policy?""`.
+- The language used by both speakers is polite but devoid of emotional content, such as `""Thank you for contacting...""`, `""May I please have your name...""`, and `""It was my pleasure assisting you""`.
+- There is a complete absence of words or phrases that would indicate joy, anger, sadness, or any other distinct emotional state. The customer's statement `""I'm not sure if I need an account""` reflects a simple lack of information rather than emotional confusion."
+https://fi-content-dev.s3.ap-south-1.amazonaws.com/audio/fbb461ac-33ec-455b-9aca-073dd68a6995/e5770bbe-26e4-40f8-b7b4-aeac5aee15c9,"Thank you for calling Brown Box customer support. My name is John, how may I assist you today?
+Hi John, this is Tom. I have a question regarding the warranty for an inverter I purchased from your website.
+Sure, Tom, I'd be happy to assist you with that. Can you please provide me with your order number or email address associated with the purchase?
+Yes, my order number is BB987654321.
+Thank you, Tom. I see that you ordered a 2000-watt inverter. Can you please tell me what the issue is with the warranty?
+Well, I received the inverter a few days ago and I'm not sure when the warranty starts. Can you help me determine the start date?
+Absolutely, Tom. The warranty for the inverter starts from the date of purchase. So in your case, the warranty would have started from the day you placed the order.
+Oh, I see it now! Thank you for clarifying that John.
+You're welcome Tom! Is there anything else I can assist you with? 
+No that's all thank-you-for-your-help!
+It was my pleasure Tom! If-you-have-any-other-questions-or-concerns-in-the-future-feel-free-to-reach-out-to-us-we-value-your-business-and-strive-to-provide-the-best-customer-experience
+I appreciate your assistance John Have-a-great-day!
+Thank-you-Tom-You-too!",1.0,"The final score is based on a comprehensive review that confirms the initial analysis. The audio quality is exceptional and serves as a benchmark for professional-grade recordings.
+
+*   **Technical Quality & Clarity:** The recording is pristine, completely free of any background noise, hiss, or digital artifacts. Both speakers are recorded with perfect clarity and balanced volume, making every word effortlessly intelligible.
+*   **Pronunciation & Articulation:** Both speakers exhibit flawless pronunciation and articulation. There are no instances of slurring, mumbling, or mispronounced words. The customer's recitation of the order number (""BB987654321"") is a clear example of this precision.
+*   **Naturalness & Prosody:** The dialogue flows with a completely natural cadence. The intonation, stress, and rhythm are perfectly suited to a real-world customer service interaction, avoiding any hint of robotic or scripted delivery.
+*   **Expressiveness:** The speakers' expressiveness is contextually perfect. The agent maintains a consistently helpful and professional tone, while the customer conveys genuine inquiry and gratitude. This level of performance meets the criteria for ""outstanding"" and ""professional excellence.""",0.2,"The final score is based on a significant degradation in transcription quality in the second half of the audio, which severely impacts readability and usability.
+
+*   **Word-Level Errors:** There are minor word-level inaccuracies, such as the insertion of ""it now"" in the phrase ""Oh, I see it now!"" when the speaker only said, ""Oh, I see.""
+*   **Punctuation Errors:** The transcription is plagued by consistent punctuation errors, including missing commas after vocatives (e.g., ""that John"", ""welcome Tom"", ""pleasure Tom"") and missing periods, which create run-on sentences.
+*   **Severe Formatting Errors:** The most critical issue is the systematic and incorrect use of hyphens to connect entire phrases and sentences in the latter half of the transcription (e.g., ""thank-you-for-your-help!"", ""If-you-have-any-other-questions-or-concerns-in-the-future-feel-free-to-reach-out-to-us...""). This formatting failure makes large portions of the text difficult to read and unprofessional.
+*   **Overall Impact:** While the word accuracy is high enough that the core meaning is recoverable with effort, the combination of severe formatting and punctuation errors significantly impacts understanding and renders the transcription of poor quality. The errors are not isolated but represent a systemic breakdown in the transcription process.","['neutral', 'confusion']","The final selections are based on clear and direct evidence from the text for two distinct states.
+
+*   The interaction is classified as having a calm, factual tone because both the customer and the agent use polite, standard transactional language throughout the conversation. 
+    *   Phrases like **""Thank you for calling...""**, **""How may I assist you...""**, and **""I appreciate your assistance...""** establish a professional and unemotional context.
+*   A state of uncertainty is also clearly identified as the primary reason for the customer's call.
+    *   The customer explicitly states, **""I'm not sure when the warranty starts,""** which is a direct expression of not knowing.
+    *   This is further supported by the direct request for clarification: **""Can you help me determine the start date?""**
+*   Other emotional states were not selected due to a lack of evidence.
+    *   Expressions of gratitude are standard politeness and do not rise to the level of delight or joy.
+    *   The phrase **""Oh, I see""** is an acknowledgement of understanding, not an expression of genuine astonishment.
+    *   The dialogue contains no language indicating anger, sadness, or fear."
+https://fi-content-dev.s3.ap-south-1.amazonaws.com/audio/fbb461ac-33ec-455b-9aca-073dd68a6995/3908e611-bf5d-405c-96ae-d8126f5f3da5,"The transcription of the audio call is as follows:
+
+Customer Support: Thank you for calling BrownBox Customer Support. My name is Alex, how may I assist you today?
+
+Caller: Hi Alex. I recently received an email from BrownBox requesting me to ship back the computer monitor I purchased last week. Can you please tell me why I am being asked to ship it back?
+
+Customer Support: Sure, I'll be happy to help you with that. May I have your order number, please?
+
+Caller: Yes, it's 789101.
+
+Customer Support: Thank you. Let me check the details of your order... I see that the monitor you purchased has been recalled by the manufacturer due to a technical issue. For safety reasons, we are requesting our customers to return the product and we will be providing a full refund.
+
+Caller: Oh, I see. That makes sense. Can you guide me through the process of returning the monitor?
+
+Customer Support: Of course! We will be sending you a prepaid shipping label via email within the next 24 hours. Please print the label, pack the monitor securely in its original packaging, and drop it off at any UPS store. Once we receive the product, we will initiate the refund process and you'll receive your money within 5-7 business days.
+
+Caller: Okay, that sounds straightforward! Thank you for explaining the process to me.
+
+Customer Support: You're welcome! Is there anything else?
+
+Caller: No that's all for now; thank you for your help!
+
+Customer Support: You're welcome! If you have any other questions or concerns please don't hesitate to reach out to us again.
+Have a great day!
+
+Caller: You too! Goodbye.
+
+Customer Support: Goodbye.",1.0,"The final score of 1.0 is based on a comprehensive review of the audio, which confirms the initial analysis. The sample represents the highest standard of audio quality.
+
+*   **Technical Quality:** The recording is technically flawless. There is a complete absence of background noise, hiss, echo, or any digital artifacts, indicating a professional studio environment.
+*   **Clarity and Enunciation:** Both speakers exhibit perfect enunciation. Every word is crystal clear and intelligible. For example, the agent's detailed explanation of the return process starting at 0:43 is delivered with exceptional clarity, making complex instructions easy to follow.
+*   **Naturalness and Expressiveness:** The dialogue is exceptionally natural and expressive. The interaction flows like a genuine conversation, not a stilted script reading. The customer's response at 0:38, ""Oh, I see. That makes sense,"" is delivered with a convincing and natural tone of realization.
+*   **Overall Performance:** The audio is a benchmark for professional excellence. The combination of pristine technical recording and flawless, expressive vocal performances leaves no room for improvement. It fully meets the criteria for an exceptional, 1.0 score.",0.4,"The final score is based on a comprehensive review of the detailed analysis, which identified several critical errors.
+
+*   **Significant Word Insertions:** The transcription includes words and an entire phrase that were not spoken in the audio. The addition of ""Thank you for explaining the process to me"" and ""again"" are major factual inaccuracies that fundamentally compromise the transcript's integrity.
+*   **Systematic Punctuation Errors:** There is a consistent misuse of exclamation marks throughout the transcript where periods are appropriate. This systematically misrepresents the neutral, professional tone of the speakers, making them sound overly enthusiastic.
+*   **Grammatical Errors:** The transcript contains grammatical mistakes, such as the incorrect use of a semicolon to connect two independent sentences and the omission of necessary commas, which affects readability and correctness.
+*   **Minor Discrepancies:** Less critical errors, such as transcribing ""you will"" as ""you'll"" and ""five to seven"" as ""5-7"", also contribute to the deviation from a verbatim record.
+
+While the general subject matter of the conversation remains understandable, the combination of factual insertions and consistent tonal misrepresentation makes the transcript unreliable and below professional quality standards, justifying a score of 0.4.","['neutral', 'confusion']","The final selections are based on clear, distinct emotional states present in the text.
+- **`neutral`** is selected because the majority of the conversation is conducted in a polite, calm, and transactional manner. Both the agent's instructions (""We will be sending you a prepaid shipping label..."") and the customer's acknowledgements (""Okay, that sounds straightforward."") are devoid of emotional content.
+- **`confusion`** is selected due to the customer's initial and explicit question, ""Can you please tell me why I am being asked to ship it back?"" This directly states a lack of understanding, which is the primary reason for the call.
+- Other emotions like `surprise` were considered for the phrase ""Oh, I see,"" but this is a very mild and ambiguous indicator. It primarily signals the resolution of confusion rather than a distinct emotional state of surprise.
+- Emotions such as `annoyance` or `fear` are not present, as the customer remains cooperative and polite throughout the interaction, despite the inconvenience of a product recall."
+https://fi-content-dev.s3.ap-south-1.amazonaws.com/audio/fbb461ac-33ec-455b-9aca-073dd68a6995/7f3a5699-b909-4ec0-9242-59a071a35478,"Here is the transcription of the audio call:
+
+- Customer Support: ""Thank you for calling BrownBox customer support. My name is Sarah. How may I assist you today?""
+- Caller: ""Hi Sarah, I am calling because I am unable to click the cancel button for my juicer mixer grinder that I recently purchased from your website.""
+- Customer Support: ""I'm sorry to hear that. May I have your order number and email address to check your account details?""
+- Caller: ""Sure, my order number is 987654 and my email address is jane.doe@email.com.""
+- Customer Support: ""Thank you for providing the details. Let me check that for you. Please bear with me for a moment... Thank you for your patience. I can see that your product is still under warranty. You can either choose to return it or get a replacement. Which option would you like to go for?""
+- Caller: ""I would like to go for a replacement.""
+- Customer Support: ""Sure, let me guide you through the replacement process. First, we need to create a replacement request—please log in to your account and click on 'My Orders.' Then select the order containing the product you want to replace and click on 'Return or Replace Items.'""
+- Caller: ""Okay, I'm on the 'Return or Replace Items' page.""
+- Customer Support: ""Great! Now select the product you want to replace and click on 'Replacement.' You will be asked to provide a reason for the replacement; please select an appropriate reason and click on submit.""
+- Caller: “Okay, I've submitted the request—what's next?”
+- Customer Support:""We will initiate the replacement process and send you a confirmation email with further details about shipping back defective products along with labels needed etc., then once received we'll dispatch replacements accordingly!""
+–Caller:“Alright sounds good but what about being unable clicking ‘Cancel’ button? Still not working.”
+–Customer Service Rep.:“Understandable concern however since opting into Replacement Process already no worries necessary regarding cancellation issue possibly caused by technical glitch; rest assured everything handled our end!”
+–Caller:“Appreciate assistance provided thank-you ever so much indeed”
+–Customer Service Rep.:“Most welcome always happy help out whenever possible any additional queries feel free reach us anytime wishing wonderful day ahead take care now bye-bye!” 
+--Caller:""Bye!""",1.0,"The final score is based on a comprehensive review of the audio's technical and performance-based qualities.
+
+*   **Technical Quality:** The recording is technically flawless. There is a complete absence of background noise, hiss, hum, or any form of digital artifacting. The audio is clean and professionally produced.
+*   **Clarity and Intelligibility:** Both the female agent and the male customer are perfectly clear and intelligible throughout the entire duration. The microphone quality is excellent, capturing the voices with crispness and presence.
+*   **Pronunciation and Pacing:** Pronunciation is perfect for both speakers. The pacing of the dialogue is natural and easy to follow, especially during the agent's step-by-step instructions.
+*   **Naturalness and Expressiveness:** The interaction sounds entirely natural and not scripted. The agent's tone is a benchmark for professional customer service—empathetic, clear, and reassuring. The customer's tone is equally believable.
+*   **Overall Excellence:** The audio meets every criterion for the 1.0 score. It demonstrates ""flawless clarity and expressive intonation"" and achieves a level of ""professional excellence"" that could be used for training or as a benchmark standard. There are no minor imperfections to warrant a lower score.",0.2,"The final score is based on a critical failure in the transcription's core function: to accurately represent the spoken audio. While the first half is flawless, the second half is fundamentally misrepresented.
+
+*   **Initial Excellence:** The transcription begins perfectly, with verbatim accuracy, correct punctuation, and proper formatting for the first 1 minute and 20 seconds.
+*   **Abrupt Shift to Paraphrasing:** At the 1:20 mark, the transcription ceases to be a verbatim record and becomes a heavily paraphrased and inaccurate summary. For example, the agent's clear instructions (""You will also receive a shipping label..."") are distorted into vague, unnatural language (""...along with labels needed etc."").
+*   **Major Omissions:** The transcription completely omits the final six turns of the conversation, which include the agent's offer of further assistance and the entire closing exchange. This is a significant loss of information.
+*   **Hallucinated Content:** The transcription invents dialogue that does not exist in the audio. The agent's final closing is entirely fabricated (""Most welcome always happy help out...""), and the caller's final lines are twisted into unnatural phrases (""Appreciate assistance provided thank-you ever so much indeed"").
+
+Because more than a third of the conversation is not transcribed but rather poorly summarized and fabricated, the document fails as an accurate record. The errors are structural and severely impact the user's ability to understand what was actually said, justifying a score of 0.2 for 'Poor quality with significant errors'.","['neutral', 'annoyance', 'joy']","The text contains multiple distinct emotional tones that are present at different points in the conversation.
+- The interaction is assigned a **neutral** tone due to the predominantly polite, professional, and factual nature of the exchange. Phrases like ""My order number is 987654"" and ""Let me guide you through the replacement process"" are purely informational and lack emotional content.
+- A tone of **annoyance** is detected when the customer has to redirect the agent back to the original problem. The statement, ""Okay, **but** what about the cancel button? I **still** can’t click it,"" expresses mild frustration that their specific issue was initially bypassed.
+- A tone of **joy** is present at the conclusion of the call, expressed as relief and gratitude. The customer's statement, ""All right, thank you **so much** for your help,"" uses an intensifier (""so much"") that elevates it beyond simple politeness to show strong satisfaction with the resolution."
+https://fi-content-dev.s3.ap-south-1.amazonaws.com/audio/fbb461ac-33ec-455b-9aca-073dd68a6995/59066f0b-bb58-43f9-9b37-7c69a6c89bee,"Here is the transcription of the audio call:
+
+Customer: Hi, I am facing an issue while logging into my account. I am getting an error message saying that I have exceeded the number of attempts to enter the correct verification code.
+
+Support: Hi there, I'm sorry to hear that you are facing issues with logging into your account. I'll be happy to assist you with that. Can you please provide me with your email address and the order number for the water purifier?
+
+Customer: Sure, my email address is john.doe@gmail.com and my order number is WB98765432.
+
+Support: Thank you for providing that information. Let me check your account and see what I can do for you. [Pause] I have checked your account and I can see that there were multiple attempts to enter the verification code. I suggest you wait for a few minutes and try again. If you're still unable to log in, I can reset your password and send you a new verification code.
+
+Customer: Okay, I'll try again in a few minutes.
+
+[End of call]",0.4,"Strictly evidence-based explanation of the determination, explanation should be in markdown format with bullet points only
+*   The vocal performances from both speakers are exceptionally clear, natural, and well-articulated. In isolation, the speech quality would warrant a score of 1.0.
+*   However, the entire recording is critically flawed by a severe and persistent low-frequency electrical hum, audible from the beginning to the end (0:00-1:58).
+*   This background noise is not a minor imperfection; it is a major technical defect that is highly distracting and makes the recording sound unprofessional.
+*   The flaw is so significant that it requires considerable listener effort to ignore, aligning perfectly with the definition of a 0.4 score: ""Audio quality that has some issues but is still generally understandable."" The speech is intelligible, but the overall quality is substantially degraded.",0.2,"The final score is based on a detailed analysis of two severe errors that critically undermine the transcription's accuracy and utility.
+
+*   **Critical Data Inaccuracy:** The most crucial piece of information in the call, the order number, is transcribed incorrectly. The speaker clearly says ""BB98765432,"" but the transcript records it as ""WB98765432."" This single error renders the transcript useless for its primary operational purpose, which is to locate the customer's order.
+*   **Major Structural Error and Omission:** The transcript incorrectly applies an `[End of call]` tag at 0:45, completely omitting over a minute of silence that follows in the audio recording. This is a significant misrepresentation of the call's actual duration and conclusion, failing to accurately document the event.
+
+While portions of the dialogue are transcribed correctly, the combination of a critical data error and a major structural omission severely compromises the overall quality, justifying a score of 0.2 (Poor).","['neutral', 'annoyance']","The final selections are based on the presence of both a calm, professional tone and an underlying sense of frustration.
+
+- A calm and professional tone is evident throughout the interaction. Both parties use polite and factual language. 
+    - The agent's dialogue is standard and helpful, such as, ""*I'll be happy to assist you with that*.""
+    - The customer provides information directly, for example, ""*Sure, my email address is John.do@gmail.com...*""
+- The customer's frustration is strongly implied by the situation described.
+    - Being locked out of an account after having ""*exceeded the number of attempts*"" is an inherently annoying experience.
+    - The long pause after being told to wait further suggests impatience."
+https://fi-content-dev.s3.ap-south-1.amazonaws.com/audio/fbb461ac-33ec-455b-9aca-073dd68a6995/a14e3290-a606-4bad-ae0a-8657b12d9958,"Thank you for contacting BrownBox customer support. My name is Sarah, how can I assist you today?
+Hi Sarah, I have an issue with my order. I received a BP monitor but the delivery was not attempted again and I'm not able to track my order. I'm really frustrated with the service.
+I'm sorry to hear that sir, I understand how frustrating it can be when you don't receive your order on time. Please share your order number so that I can check the status of your order.
+My order number is BB123456.
+Thank you for providing the order number. Let me check the status of your order.",1.0,"The final score is based on a comprehensive review of the audio against the established criteria, confirming the initial detailed analysis.
+
+*   **Clarity and Pronunciation:** Both speakers exhibit flawless diction. Every word is crisp, clear, and perfectly intelligible, with no muffling, slurring, or technical distortion. The audio is technically pristine.
+*   **Naturalness and Intonation (Prosody):** The dialogue flows with complete naturalness. The female speaker's intonation is appropriately professional and empathetic for a support agent, while the male speaker's intonation convincingly conveys frustration without sounding artificial.
+*   **Expressiveness:** The performances are highly expressive and contextually perfect. The agent's shift from a welcoming tone to one of empathy and problem-solving is seamless. The customer's frustration is palpable and believable, making the scenario engaging.
+*   **Technical Quality:** The recording is of studio quality. There is a complete absence of background noise, hiss, echo, clipping, or any other audio artifacts. The audio quality is consistent for both speakers.
+
+This audio sample meets the highest standard of quality, aligning perfectly with the definition of a 1.0 score: ""Exceptional audio quality that demonstrates flawless clarity, pronunciation, and expressiveness... truly outstanding performances that achieve professional excellence.""",0.8,"The final score is based on the following evidence:
+
+*   The transcription exhibits perfect word-for-word accuracy. All spoken words, including proper nouns like ""BrownBox"" and the specific order number ""BB123456"", are captured flawlessly.
+*   A single, minor punctuation error exists in the third segment. The transcription reads, ""I'm sorry to hear that sir, I understand..."", while the speaker's cadence and correct grammar would punctuate this as two separate thoughts: ""I'm sorry to hear that, sir. I understand..."".
+*   This error consists of a missing vocative comma before ""sir"" and the incorrect use of a comma instead of a period to end the sentence.
+*   This minor punctuation issue does not impact the semantic meaning, readability, or overall understanding of the dialogue in any significant way.
+*   The quality perfectly matches the criteria for a 0.8 score, which is defined as ""very high quality with only minor errors that do not significantly impact overall accuracy or understanding.""","['neutral', 'annoyance', 'confusion']","The text contains multiple distinct tones from both the customer and the agent.
+
+*   The **`neutral`** tone is selected due to the agent's professional and polite language (e.g., ""*Thank you for contacting Brown Box customer support*"" and ""*Let me check the status of your order*"") and the customer's factual statements (e.g., ""*My order number is BB123456*"").
+*   The **`annoyance`** tone is present because the customer explicitly states, ""*I'm really frustrated with the service*,"" directly expressing their irritation.
+*   The **`confusion`** tone is identified from the customer's statement, ""*I'm not able to track my order*,"" which shows a lack of information and understanding about the order's status.
+*   Other negative emotions like `anger` or `sadness` are not selected because the customer's feeling is specifically identified as **frustration**, which aligns best with annoyance, and there is no evidence of stronger hostility or sorrow."
+https://fi-content-dev.s3.ap-south-1.amazonaws.com/audio/fbb461ac-33ec-455b-9aca-073dd68a6995/51d6f5f0-7945-4c04-9395-2dff7f761fbe,"Here's the transcription of the audio call:
+
+Customer Support: Thank you for calling Brown Box Customer Support. My name is Alex, how can I assist you today?
+
+Customer: Hi Alex, I'm trying to reactivate my account to purchase a wet grinder, but it's not letting me log in.
+
+Customer Support: I'm sorry to hear that. May I have your email address and phone number associated with the account please?
+
+Customer: Sure, my email address is johnsmith@email.com and my phone number is 123-456-7890.
+
+Customer Support: Thank you for verifying your account details, John. Let me check your account information... It looks like your account has been inactive for more than six months, which is why it has been deactivated.
+
+Customer: What? Why was it deactivated? I never received any notification about it.
+
+Customer Support: I'm sorry for the inconvenience, John. Our system automatically deactivates accounts if there’s no activity for six months. However, we can reactivate your account for you now.
+
+Customer: Okay, please do that. I need to purchase the wet grinder urgently.
+
+Customer Support: Sure, I can help you with that. I will need to verify your identity first. Can you please provide me with your full name, billing address and the last four digits of the credit card used to make the last purchase on your account?
+
+Customer: My name is John Smith; my billing address is 123 Main Street, Anytown USA; and the last four digits of my credit card are 1234.
+
+Customer Support: Thank you for verifying your identity John. I have reactivated your accounts and you should be able to log in now. Can you please try logging in and let me know if you face any issues?
+
+(Customer attempts login)
+
+(Customer): Yes! It's working now! Thank you for your help!
+
+Support Agent (Alex): You're welcome John! Is there anything else I can assist you with?
+
+John Smith (customer): No that's all but I'm not happy with how my account was deactivated without any notification—I hope this doesn't happen again...
+
+Support Agent (Alex): We understand completely—apologies once again—we'll ensure feedback gets passed onto our team regarding this matter—please feel free reaching out anytime should further assistance needed—
+
+John Smith (customer) : Okay thanks
+
+Support Agent(Alex) : You’re welcome , Have great day ahead !
+
+John Smith(customer ): Goodbye
+
+Support agent(Alex) : Goodbye",1.0,"The final score is based on a comprehensive review of the audio against the established criteria. The initial analysis is confirmed to be accurate.
+
+*   **Clarity and Pronunciation:** The audio is flawless in its clarity. Both speakers are recorded with exceptional quality, exhibiting perfect enunciation and pronunciation. Every word is crisp, distinct, and effortless to understand, with no mumbling or volume issues.
+*   **Naturalness and Expressiveness:** The dialogue demonstrates a benchmark level of naturalness and expressiveness. The interaction flows like an authentic conversation. The customer support agent's tone is consistently professional and empathetic, while the customer's voice effectively conveys a realistic arc of confusion, urgency, and polite frustration.
+*   **Technical Fidelity:** The recording is technically pristine. There is a complete absence of any background noise, hiss, hum, or room echo. No digital artifacts, such as clicks, pops, or clipping, are audible throughout the entire sample. The quality is equivalent to a professional studio production.
+*   **Conclusion:** The audio meets and exceeds the criteria for the highest score. It is an example of a truly outstanding performance that achieves professional excellence in every evaluated category, leaving no room for improvement.",0.2,"The score of 0.2 is assigned based on several critical and systemic failures in the transcription that severely undermine its reliability and accuracy.
+
+- **Critical Factual Error:** The transcription incorrectly records the customer's phone number as ""123-456-7890"" when the audio clearly states ""123-456-790."" This error with personally identifiable information (PII) is a major flaw.
+- **Abandonment of Verbatim Transcription:** From approximately 01:40 onwards, the transcription ceases to be a record of the spoken words and becomes a heavy, inaccurate paraphrase. It misrepresents the agent's professional tone, omits specific phrases like ""apologize for the inconvenience caused,"" and adds words that were never spoken, such as ""regarding this matter.""
+- **Significant Omissions:** Key phrases are completely left out, including the customer saying ""Okay, let me try"" (01:24) and ""You too"" (01:55), which disrupts the conversational flow.
+- **Systemic Inconsistencies:** The document is plagued by inconsistent speaker labels (e.g., ""Customer Support,"" ""Support Agent (Alex),"" ""John Smith(customer )"") and erratic punctuation, indicating a lack of quality control.
+- **Word-Level Inaccuracies:** Multiple smaller errors, such as transcribing the singular ""account"" as the plural ""accounts"" and changing ""thank you"" to ""thanks,"" further degrade the overall quality.
+
+While the first half is partially usable, the combination of a critical PII error and the fundamental failure to provide a verbatim record in the second half makes the transcription poor and unreliable.","['neutral', 'surprise', 'annoyance', 'confusion']","The final selections are based on distinct emotional states expressed by the speakers.
+
+- **`neutral`** is included because the customer support agent maintains a professional, polite, and factual tone throughout the entire conversation (e.g., ""Thank you for calling Brown Box customer support,"" ""Let me check your account information.""). The customer also adopts this tone when providing information.
+- **`confusion`** is present in the customer's initial state, as they do not understand the problem, stating, ""...it's not letting me log in."" This is reinforced by their direct question, ""Why was it deactivated?""
+- **`surprise`** is clearly expressed by the customer's immediate and sharp reaction, ""What?"", upon learning their account was deactivated unexpectedly.
+- **`annoyance`** is explicitly stated by the customer near the end of the call: ""I'm not happy with the way my account was deactivated without any notification."" This directly communicates their frustration with the situation.
+- Other labels like `anger` were not selected because the customer's negative emotion is expressed as frustration and displeasure, not escalating to overt anger."
+https://fi-content-dev.s3.ap-south-1.amazonaws.com/audio/fbb461ac-33ec-455b-9aca-073dd68a6995/2279485e-c37c-4226-8133-e119876b60bd,"Hello, thank you for contacting Brown Box customer support. My name is Alex. How can I assist you today?
+Hi, I'm calling about my order for a water purifier. I received it yesterday but it's not working correctly. I want to return it and get a refund.
+I'm sorry to hear that. I'll be happy to help you with that. Can you please provide me with your order number?
+Sure, it's 12345.
+Thank you for the information. May I know the reason for the return?
+As I mentioned earlier, the product is not working correctly. I want to return it and get a refund.
+I'm sorry for the inconvenience; we would be happy to process your return and refund. However, since you've opted for cash on delivery, it will take some time to process your refund. Our refund timelines for cash-on-delivery returns are usually within 7-14 business days from the date of pickup.
+What? That's too long! Why does it take so much time?
+I understand your frustration but the refund process takes time as we have to verify the product's condition and ensure that it's unused and in its original packaging. Once we receive the product, we'll initiate the refund process and it will take 7-14 business days for the refund to reflect in your account.
+This is unacceptable! I need my money back immediately! Can't anything be done about this delay?
+I'm sorry but we cannot expedite refunds any further than our standard processing times allow us due diligence checks which include verifying returned items' conditions before issuing refunds promptly thereafter according also banking regulations governing such transactions require certain waiting periods between initiating requests until completion thereof hence why there may seem like delays involved though rest assured everything possible being done expedite matters wherever feasible given constraints faced overall situation at hand here now today hope understanding appreciated regarding same matter discussed above already explained previously stated again just reiterating points made earlier response query raised concern expressed dissatisfaction voiced request immediate resolution sought unfortunately unable fulfill demand due reasons outlined hope explanation provided clarifies position taken behalf company policy procedures followed accordance industry standards practices adopted similar cases handled past present future alike without exception deviation whatsoever unless otherwise specified agreed upon mutually parties concerned prior arrangement agreement reached beforehand basis case-by-case assessment individual circumstances warranting special consideration granted exceptional grounds merit justified cause shown sufficient evidence supporting claim lodged submitted review evaluation decision rendered final binding effect outcome determined solely discretion management team responsible overseeing operations department dealing customer complaints grievances issues arising out transactions conducted platform services offered customers worldwide irrespective location domicile residence nationality citizenship status etcetera et cetera ad infinitum ad nauseam ad absurdum reductio ad absurdum argumentum ex silentio post hoc ergo propter hoc cum hoc ergo propter hoc non sequitur petitio principii circulus in probando ignoratio elenchi fallacia accidentis secundum quid simpliciter complex question begging question loaded question false dilemma bifurcation dichotomy trilemma quadrilemma tetralemma pentalemma hexalemma heptalemma octolemmas novemlemma decemlemma undecimlemma duodecimlemma tredecimlemma quattuordecimlemmas quindecimlemmas sedecimalemmas septendecimalemmas duodevigintilemmas unvigintilemms vigintilemms vigintiunialems vigintiunalems vigintiunalems vigintiunalems vigintiunalems vigintiunalems vicesima vice versa versa vice versa vertere verto versare verso versus versus vespertilionidae vespertiliones vespertine vestal virgin vestals vestige vestibule vestigial vessel vessels vestae veteris veteres vetere veto vetoed vetting veterinarian veterinary veterinarians veterinariae veterinarius vexation vexations vexatious viaducts via vias viable viability viabilities vibe vibes vibrance vibrant vibrancy vibrating vibration vibrations vibrator vibrators vicar vicars vicious viciously victim victims victimize victimized victimizers victimizer victor victoria victorious victory victories video videos videography videotaped videotapes vie view viewed viewer viewers viewing views vigil vigilant vigilance vigilante vigilantes vigor vigorous vigorously vile vileness villain villains villager villagers village villages vine vines vineyard vineyards vintage vintages violate violated violates violating violation violations violence violent violently violet violets violin violins vipers viral virality viruses virus virtue virtues virtuously virtuous visa visas viscera visceral viscerally visibility visible visibly vision visions visit visited visiting visitor visitors visits visual visually vital vitality vitals vitamin vitamins vivid vividly vocabulary vocal vocals vocation vocations voice voices void voided voiding volatile volatility volume volumes voluntary voluntarily volunteer volunteers volunteering vomit vomited vomiting vote voted voter voters votes voting voucher vouchers voyage voyages vulgar vulnerability vulnerabilities vulnerable vulnerably wade waded wading wage wages wager wagers wagon wagons waist waists wait waited waiting waitress waitresses waiter waiters wake wakes waking walk walked walking walks wall walls wallet wallets walnut walnuts wander wandered wandering wants war wars ward wards warehouse warehouses warm warmed warming warmth warn warned warning warnings warp warped warping warrior warriors wartime was wash washed washing washes waste wasted wasting watch watched watching watches water watered watering waters wave waved waves wax waxed waxing way ways weak weakened weakening weakness weaknesses wealth wealthy weapon weapons wear wearing wears weather weave weaving web webs website websites wed wedding weddings wedge wedges weed weeds week weeks weekend weekends weigh weighed weighing weight weights weird welcome welcomed welcoming welfare well wells west western wet wetter what whatever wheat wheel wheels when whenever where whereas wherein whereby whether which whichever while whilst whistle whistled whistles white whites who whoever whole wholes whom whose why wide widely widen widened wider widow widowed wife wild wilderness wildlife wildly will willing willingness wills win wind window windows winds windy wine wines wing wings winner winners winning winter winters wipe wiped wiping wire wired wires wiring wise wish wished wishes wishing wit witch witches withdraw withdrawal withdrawals withdrew withdrawn withdrawing within without witness witnessed witnesses witnessing wolf wolves woman women won wonder wondered wonderful wondering wood wooden woods wool word words wore work worked worker workers workforce workloads workload workplace workplaces works workshop workshops world worlds worried worry worrying worse worsened worsening worship worst worth worthy would wound wounded wounds wow wrap wrapped wrapping wreck wreckage wrestle wrestled wrestling wrinkled write writer writers writes writing writings written wrong wrongly wrote wrought yard yards yarn year year's years yell yelled yelling yellow yes yesterday yet yield yielded yielding yields yoga yogurt yolk yonder young younger youngest youngsters youth youthful youths zeal zealous zero zest zigzag zip zipped zipper zippers zone zones zoo zoom zoomed zooming zucchini",0.6,"The final score is based on a comprehensive evaluation of the audio file, which contains both exceptional speech quality and a significant technical flaw.
+
+*   **Strengths - Speech Quality (0:00 - 1:46):** The dialogue portion of the audio is of very high quality. Both the female agent and the male customer speak with outstanding clarity, natural intonation, and professional-grade pronunciation. The performances are highly expressive and sound authentic to a real customer support call. The recording environment for the speech is clean, with no background noise or hiss.
+
+*   **Weakness - Technical Artifact (1:47 - End):** The primary reason for the score reduction is a major technical flaw. At 1:47, a loud, low-frequency electronic tone abruptly begins and persists until the end of the file. This is not a minor issue; it is a significant and distracting production error that mars the overall quality of the audio file.
+
+*   **Justification for Score 0.6:** While the speech itself would merit a 0.8 or 1.0, the file as a whole cannot be considered 'very high quality' due to the significant impact of the final artifact. The score of 0.6, defined as ""Good audio quality with some noticeable imperfections but still maintains good clarity and naturalness,"" accurately reflects this situation. The core content is professional and clear, but the file is ultimately compromised by a noticeable production flaw.",0.0,"The final score is based on a catastrophic failure in the transcription that renders it fundamentally unusable and misleading.
+
+*   **Massive Insertion of Fabricated Content:** At approximately the 1:12 mark, the transcription completely decouples from the audio. It inserts a massive, unformatted block of thousands of nonsensical and unrelated words, including Latin phrases and dictionary-style word lists (e.g., ""zoo zoom zoomed zooming zucchini"").
+*   **Critical Omission:** The transcription completely omits the entire second half of the audio (approximately 1 minute and 10 seconds). This omitted segment contains the crucial resolution of the customer service call, including the agent confirming the refund status and the closing remarks.
+*   **Total Loss of Integrity:** While the first half of the transcription is highly accurate, the subsequent failure is so severe that it destroys the document's integrity. A user relying on this transcript would be completely misled about the outcome of the conversation.
+*   **Alignment with 0.0 Criteria:** The combination of large-scale fabrication and critical omission represents a total system breakdown. The transcription is ""severely compromised with major errors that significantly impact understanding,"" which perfectly aligns with the definition of a 0.0 score.","['neutral', 'surprise', 'anger', 'annoyance']","The interaction contains multiple distinct emotional tones from both speakers.
+
+- A **neutral** tone is consistently maintained by the customer support agent, who uses professional and formulaic language such as, *""Hello, thank you for contacting Brownbox customer support""* and *""I will be happy to help you with that.""*
+- The customer expresses clear **annoyance** and impatience when having to repeat information (*""As I mentioned earlier...""*) and when questioning the refund duration (*""Why does it take so much time?""*).
+- A distinct moment of **surprise** is evident when the customer reacts to the refund timeline with the exclamation, *""What? That's too long.""*
+- The customer's frustration escalates into **anger**, as shown by the explicit statement, *""This is unacceptable! I need the refund immediately.""*
+- Other emotional states like sadness or confusion are not supported by the text. The customer understands the policy but is frustrated by it, and their final acceptance (*""All right, I understand""*) is one of resignation, not sadness."
+https://fi-content-dev.s3.ap-south-1.amazonaws.com/audio/fbb461ac-33ec-455b-9aca-073dd68a6995/ad4e732c-b58a-4fe0-9b1e-eb8fed357918,"Hello, thank you for calling BrownBox customer support. My name is Rachel. How may I assist you today?
+Hi Rachel, I was browsing your website for a pair of shoes, and I noticed that the one I want is currently out of stock. Can I still order it?
+I'm sorry to hear that the shoes you want are out of stock. Can I have the name or item number of the shoes you're looking for?
+Yes, it's the Adidas Ultraboost 21 in black, item number 123456.
+Thank you for providing that information. I'm sorry to inform you that those shoes are currently out of stock and temporarily unavailable. However, we do have similar shoes that you might be interested in. Would you like me to check them out for you?
+Yes, please. I'd really like a pair of comfortable running shoes.
+Absolutely! Let me check our inventory for you.
+
+After a brief hold...
+
+I found a pair of Nike Air Zoom Pegasus 38 in black which is a great alternative to the Adidas Ultraboost 21. Would you like me to place an order for this shoe?
+Yes, that sounds good! Can you tell me when the Adidas Ultraboost 21 will be back in stock?
+Unfortunately, I don't have an exact date on when they will be back in stock; however, we receive new shipments every week so I'd suggest checking our website regularly.
+Okay I'll do that then! Thank You!
+You're welcome! Is there anything else I can assist with today? 
+No that's all thankyou very much!
+It was my pleasure assisting with your query if any further questions arise feel free contact us again anytime Have A Great Day ahead Goodbye
+You too goodbye",1.0,"The final score is based on a comprehensive review of the audio, which aligns perfectly with the initial detailed analysis. The audio quality is exceptional across all evaluated criteria.
+
+*   **Technical Quality:** The recording is pristine, with a complete absence of any background noise, hiss, hum, or digital artifacts. The audio is professionally mixed, with balanced and consistent volume levels for both speakers, and no instances of clipping or distortion.
+*   **Clarity and Pronunciation:** Both speakers are perfectly articulate, making the dialogue effortlessly intelligible. Pronunciation is flawless, including specific product names like ""Adidas Ultra Boost 21"" and ""Nike Air Zoom Pegasus 38"", which are delivered with perfect clarity.
+*   **Intonation and Expressiveness:** The dialogue flows with a natural cadence, mirroring a real, professional conversation. The agent's tone is consistently helpful and empathetic (e.g., at 0:17), while the customer sounds genuine and clear in their requests. The expressiveness is perfectly calibrated for a customer service scenario.
+*   **Overall Performance:** The audio contains no discernible flaws. It serves as a benchmark example of professional-grade voice acting and audio production. Assigning any score lower than 1.0 would inaccurately imply the existence of imperfections, which are not present in this sample.",0.4,"The final score is based on a significant and progressive degradation of transcription quality.
+
+*   **Initial Accuracy:** The first several turns of the conversation are transcribed with near-perfect accuracy, with only minor, acceptable formatting differences (e.g., ""Brown box"" vs. ""BrownBox"").
+*   **Progressive Errors:** The transcription quality sharply declines midway through the call, introducing a high volume of errors.
+*   **Substitutions and Paraphrasing:** Multiple phrases are altered, changing the speaker's original wording and intent (e.g., ""I really want"" becomes ""I'd really like""; ""for you"" becomes ""for this shoe"").
+*   **Critical Omissions and Insertions:** Key contextual phrases are omitted (e.g., ""to see if they become available""), and words are inserted that were never spoken (e.g., ""then"", ""query"", ""ahead"", ""Goodbye"").
+*   **Catastrophic Semantic Failure:** The final closing statements from both speakers are almost entirely rewritten, not transcribed. The customer's specific gratitude (""Thank you for helping me find an alternative pair of shoes"") is lost, and the agent's professional closing is replaced with a fabricated, unprofessional script. The agent's final ""Goodbye"" is also omitted entirely.
+*   **Conclusion:** While the initial part of the transcript is accurate and the general topic is understandable, the severe errors in the second half critically compromise the semantic fidelity and render it an unreliable record of the conversation. It falls well below professional standards but is not completely unusable due to the accurate first half, making 0.4 the most appropriate score.","['neutral', 'joy', 'sadness']","The text contains multiple distinct emotional tones expressed by the speakers.
+- A **neutral** tone is established by the professional, polite, and transactional nature of the conversation. This is evident in the agent's standard greeting, ""Hello, thank you for calling Brownbox customer support,"" and the customer's factual responses, such as providing the item number.
+- **Sadness** is present in the form of disappointment. The customer explicitly states their desired item is ""currently out of stock"" and later asks when it will be available again, indicating an unfulfilled want.
+- **Joy** is expressed when the customer finds a suitable solution. Their response, ""Yes, that sounds good,"" and their specific gratitude, ""Thank you for helping me find an alternative pair of shoes,"" show clear satisfaction and relief.
+- Other emotions like *anger* or *annoyance* are absent, as the customer remains polite and cooperative despite the initial problem."
+https://fi-content-dev.s3.ap-south-1.amazonaws.com/audio/fbb461ac-33ec-455b-9aca-073dd68a6995/f126bfee-7f72-40c7-af9a-cbf48a889ed2,"Thank you for your patience. I've checked the manual, and I can assist you with the installation process of your Canon EOS 90D DSLR camera. Let's start by ensuring that you've inserted the battery and memory card correctly. Have you done this step already?",0.8,"The final score is based on a comprehensive review of the audio against the established criteria.
+
+*   **Clarity & Pronunciation:** The audio is exceptional in its clarity. Both the female agent and the male customer speak with perfect enunciation, making every word completely intelligible. There is no muffling, distortion, or sibilance.
+*   **Naturalness & Intonation:** The dialogue is highly natural. The agent's tone is professional and helpful, while the customer's speech patterns and intonation sound authentic to the situation. The prosody is excellent and enhances the realism of the interaction.
+*   **Technical Quality:** The recording is extremely clean, with a complete absence of background noise, hiss, or hum. This suggests a professional recording environment.
+*   **Identified Imperfection:** A single, very minor audio click is audible at `[00:34]` just as the agent finishes speaking and the hold music starts. This is an isolated and almost imperceptible technical flaw.
+
+**Conclusion:** The audio is of professional-grade quality and easily surpasses the 0.6 threshold. The single, minor technical artifact prevents a flawless 1.0 score. Therefore, a score of 0.8 is the most accurate assessment, reflecting very high-quality audio with a minor issue that does not significantly impact the overall listening experience.",0.0,"The final evaluation confirms a complete and total misalignment between the audio and the provided transcription.
+
+*   The provided transcription has zero alignment with the audio content. Not a single word from the transcription is spoken in the audio file.
+*   The audio file contains the beginning of a customer support interaction, including the agent's greeting, the customer's problem statement, and the agent asking for an order number before placing the customer on hold.
+*   The transcription contains a segment that would logically occur *after* the hold period, where the agent begins the troubleshooting process. This part of the conversation is not included in the audio.
+*   This represents a fundamental failure of alignment, where the text is entirely unrelated to the source audio. Consequently, the quality is severely compromised, and the only appropriate score is 0.0.","['neutral', 'annoyance', 'confusion']","The final selections are based on the distinct emotional and professional tones present in the text.
+- **neutral** is included because the conversation is conducted in a polite, professional, and factual manner. The agent's greeting, `""Hello, Thank you for contacting Brownbox customer support""`, and the customer's direct answer, `""Yes, my order number is 98765...""`, are both devoid of personal emotion.
+- **confusion** is selected due to the customer's explicit statements indicating a lack of understanding. The phrases `""I'm having trouble installing it""` and `""Can you help me with the installation process?""` are direct evidence of their confusion.
+- **annoyance** is chosen as the customer's statement `""I'm having trouble""` implies a mild level of frustration or irritation with the product not working as expected. This is a subtle but distinct emotional state separate from their confusion."
+https://fi-content-dev.s3.ap-south-1.amazonaws.com/audio/fbb461ac-33ec-455b-9aca-073dd68a6995/7430385c-9449-4f8f-9e4e-3115cb477e98,"Thank you for calling BrownBox customer support. My name is Sarah, how may I assist you today?
+Hi Sarah, this is Jane. I have been trying to verify my mobile number and email address to place an order for a kitchen chimney, but I am not receiving the OTP or verification code.
+I'm sorry to hear that, Jane. Let me check that for you. Can you please confirm your mobile number and email address?
+Yes, my mobile number is 9876543210 and my email address is jane@email.com.
+Thank you, Jane. Let me check our system...I see that we have sent the OTP and verification code to your mobile number and email address. Can you please confirm if you have received them?
+No, I haven't received any codes yet.
+I'm sorry for the inconvenience, Jane. Let me check if there are any issues with our system... I'm sorry Jane but our system is working fine and we have sent the codes to your mobile number and email address. Can you please check your spam or junk folder? 
+I have checked all folders but I haven't received any codes.
+I'm sorry for the trouble, Jane. Let me try resending the codes to your mobile number and email address...Can you please check if you've received them now? 
+Yes! I've received the codes now; thank you Sarah!
+You're welcome Jane! Is there anything else I can assist with?
+No that's all.
+I understand your frustration Jane & apologize again for delay; We value business & will ensure issue doesn’t happen in future
+Okay thanks
+You’re welcome! If other questions/concerns feel free reach out – Value business strive provide best customer experience
+Sure will do 
+Thanks! Have great day",0.6,"The final score is based on a critical balance between the audio's technical perfection and its significant performance flaws.
+
+*   **Primary Strength - Technical Quality:** The audio has flawless technical characteristics. There is zero background noise, no clipping, and no audio artifacts. The clarity and intelligibility of both speakers are perfect, making every word easy to understand.
+*   **Primary Weakness - Performance Quality:** The female speaker's delivery is the central issue. Her speech is consistently robotic, monotonous, and lacks the natural prosody of human conversation. This is not an isolated incident but a defining characteristic of her performance throughout the entire dialogue.
+*   **Evidence of Weakness:** Specific phrases that should convey empathy, such as ""I'm sorry to hear that"" (0:18) and ""I understand your frustration Jane"" (1:11), are delivered with a flat, synthetic-sounding affect that undermines their meaning.
+*   **Justification for 0.6 Score:** The audio cannot be rated higher (0.8 or 1.0) because the performance flaws of the female speaker are major and significantly impact the overall naturalness of the interaction. However, it cannot be rated lower (0.4) because its technical clarity is exceptional. Therefore, 0.6 is the most accurate score, representing ""Good audio quality with some noticeable imperfections"" where the imperfection is the agent's unnatural delivery.",0.4,"The provided analysis is accurate. The transcription's quality is drastically inconsistent, starting with high accuracy and degrading into severe summarization, which justifies a 'Fair' score.
+
+*   **Initial Accuracy:** The first minute of the transcription is largely accurate, correctly capturing the dialogue with only minor deviations (e.g., `I'm` for `I am`).
+*   **Punctuation and Tone Misrepresentation:** The transcription incorrectly uses exclamation marks and a semicolon where they are not warranted by the speakers' calm tones. For example, the audio ""Yes, I have received the codes now. Thank you, Sarah"" is transcribed as ""Yes! I've received the codes now; thank you Sarah!"".
+*   **Severe Summarization:** The most significant failure begins around the 1:18 mark, where the transcription abandons verbatim accuracy entirely and becomes a set of informal notes.
+*   **Evidence of Summarization (Omissions and Substitutions):**
+    *   Audio: ""I understand your frustration, Jane, and I apologize for the delay. We value your business and we will ensure that this issue doesn't happen again in the future.""
+    *   Transcription: ""I understand your frustration Jane & apologize again for delay; We value business & will ensure issue doesn’t happen in future"". This version omits multiple words, incorrectly adds ""again"", and uses non-standard symbols (`&`).
+    *   Audio: ""If you have any other questions or concerns, feel free to reach out to us.""
+    *   Transcription: ""If other questions/concerns feel free reach out"".
+*   **Conclusion:** The transcription is a mix of high and extremely low quality. While the core topic is understandable, the complete failure to transcribe the latter half of the conversation verbatim makes it fall far below professional standards. It is not completely unusable, which aligns perfectly with the 0.4 score.","['neutral', 'joy', 'annoyance']","The text contains multiple distinct emotional tones from both speakers.
+- **`neutral`** is present in the agent's consistently professional and polite language (e.g., ""Thank you for calling Brown Box customer support. My name is Sarah. How may I assist you today?"") and the customer's factual exchanges (e.g., ""My mobile number is 9876543210..."").
+- **`annoyance`** is clearly expressed by the customer due to the technical issue. The phrase ""I have been trying to verify..."" implies repeated, frustrating failures. The agent later confirms this by stating, ""I understand your frustration, Jane.""
+- **`joy`** is selected to represent the customer's relief and satisfaction once the problem is solved. This positive shift is evident in the statement, ""Yes, I have received the codes now. Thank you, Sarah."""
+https://fi-content-dev.s3.ap-south-1.amazonaws.com/audio/fbb461ac-33ec-455b-9aca-073dd68a6995/84658ea9-13df-4469-926b-dd58212c2580,,0.6,"The final score is based on a combination of strong performance quality and noticeable technical flaws.
+
+*   The audio features excellent clarity and natural, expressive dialogue. Both speakers deliver their lines in a way that is perfectly intelligible and effectively conveys their respective characters.
+*   However, the recording is compromised by a persistent, low-frequency hum that is audible whenever the male speaker talks. This indicates a poor signal-to-noise ratio for that specific audio channel.
+*   The technical quality between the two speakers is imbalanced; the female speaker's audio is clean, while the male speaker's audio contains consistent noise.
+*   A significant and distracting audio artifact, a loud thump or pop, is present at the very end of the file, which is a clear editing or recording error.
+
+While the core speech is clear and well-performed, the noticeable and persistent technical imperfections prevent the audio from achieving a higher score. The quality is good and professional, but not very high-quality or exceptional.",error,,"['neutral', 'annoyance', 'confusion']","The text contains multiple distinct emotional tones from two different speakers, justifying the selection of three labels.
+- **Annoyance** is clearly present in the agent's responses. This is shown through explicit interjections like *""Ugh, fine""* and condescending, impatient language such as *""Did you even bother checking there?""* and *""Your account's obviously still active""*.
+- **Confusion** accurately describes the user's situation. The user initiates the conversation because they are in a state of being unable to solve a problem, stating *""I'm having trouble logging into my account""* and *""I never got the reset email""*.
+- **Neutral** is included because the user maintains a calm, polite, and factual tone throughout the interaction, using phrases like *""Hi""*, *""Could you please help me...""*, and providing information directly (*""Sure, it's James.smith@example.com""*).
+- Other labels like *anger* were not selected because the agent's tone is more dismissive and condescending than overtly furious. All other emotional labels were rejected due to a complete lack of supporting evidence."
