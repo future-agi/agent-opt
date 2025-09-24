@@ -1,0 +1,17 @@
+[project]
+name = "agent-opts"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "dspy>=3.0.3",
+    "ipykernel>=6.30.1",
+    "ipywidgets>=8.1.7",
+    "nltk>=3.9.1",
+    "opik>=1.8.52",
+    "opik-optimizer>=1.0.6",
+    "pip>=25.2",
+    "scipy>=1.16.2",
+    "ujson>=5.11.0",
+]
