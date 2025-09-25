@@ -9,6 +9,9 @@ from prompt_optimizer.base import DataMapper
 def main():
     # Load API keys from .env file
     load_dotenv()
+    if not os.getenv("OPENAI_API_KEY") or not os.getenv("FI_API_KEY"):
+        print("API keys not found. Please create a .env file with OPENAI_API_KEY and FI_API_KEY.")
+        return
 
     # 1. Set up the Generator
     initial_prompt = "Write a short story based on the following idea: {prompt}"
@@ -24,15 +27,14 @@ def main():
     )
 
     # 3. Set up the Data Mapper
-    # This maps our dataset keys to the keys the evaluator expects
-    key_map = {
-        "input": "prompt",       # Maps the 'prompt' key from our dataset to 'input'
-        "output": "generated_output" # Maps the generator's output to 'output'
-    }
+    key_map = { "input": "prompt", "output": "generated_output" }
     data_mapper = DataMapper(key_map=key_map)
 
     # 4. Set up the Optimization Strategy
-    strategy = RandomSearchStrategy(num_variations=5)
+    strategy = RandomSearchStrategy(
+        teacher_model="gpt-5", 
+        num_variations=5
+    )
 
     # 5. Set up and run the Optimizer
     optimizer = Optimizer(
@@ -51,13 +53,17 @@ def main():
     results = optimizer.run(trainset=dataset, valset=dataset)
 
     print("\n--- Optimization Complete ---")
-    print(f"Final Score: {results.final_score:.4f}")
-    print("Best Prompt Found:")
-    print(results.best_generator.get_prompt_template())
+    if results.final_score > -1:
+        print(f"Final Score: {results.final_score:.4f}")
+        print("Best Prompt Found:")
+        print(results.best_generator.get_prompt_template())
 
-    print("\n--- History of Prompts Tried ---")
-    for item in results.history:
-        print(f"Score: {item['score']:.4f}, Prompt: {item['prompt']}")
+        print("\n--- History of Prompts Tried ---")
+        for item in results.history:
+            print(f"Score: {item['score']:.4f}, Prompt: {item['prompt']}")
+    else:
+        print("Optimization did not find a successful prompt.")
+
 
 if __name__ == "__main__":
     main()
