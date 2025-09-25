@@ -1,17 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "agent-opts"
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.11"
-dependencies = [
-    "dspy>=3.0.3",
-    "ipykernel>=6.30.1",
-    "ipywidgets>=8.1.7",
-    "nltk>=3.9.1",
-    "opik>=1.8.52",
-    "opik-optimizer>=1.0.6",
-    "pip>=25.2",
-    "scipy>=1.16.2",
-    "ujson>=5.11.0",
+name = "prompt-optimizer"
+version = "0.0.1"
+authors = [
+  { name="Future AGI", email="hello@futureagi.io" },
 ]
+description = "A library for prompt optimization."
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "litellm>=1.35.2",
+    "ai-evaluation>=0.1.8",
+    "python-dotenv>=1.0.0",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

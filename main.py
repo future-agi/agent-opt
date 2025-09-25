@@ -1,6 +1,63 @@
-def main():
-    print("Hello from agent-opts!")
+import os
+from dotenv import load_dotenv
+from fi.evals import Evaluator as AIEvaluator
+from prompt_optimizer import Optimizer
+from prompt_optimizer.generators import LiteLLMGenerator
+from prompt_optimizer.strategies import RandomSearchStrategy
+from prompt_optimizer.base import DataMapper
 
+def main():
+    # Load API keys from .env file
+    load_dotenv()
+
+    # 1. Set up the Generator
+    initial_prompt = "Write a short story based on the following idea: {prompt}"
+    generator = LiteLLMGenerator(
+        model="gpt-4o-mini",
+        prompt_template=initial_prompt
+    )
+
+    # 2. Set up the Evaluator (from the external library)
+    evaluator = AIEvaluator(
+        fi_api_key=os.getenv("FI_API_KEY"),
+        fi_secret_key=os.getenv("FI_SECRET_KEY")
+    )
+
+    # 3. Set up the Data Mapper
+    # This maps our dataset keys to the keys the evaluator expects
+    key_map = {
+        "input": "prompt",       # Maps the 'prompt' key from our dataset to 'input'
+        "output": "generated_output" # Maps the generator's output to 'output'
+    }
+    data_mapper = DataMapper(key_map=key_map)
+
+    # 4. Set up the Optimization Strategy
+    strategy = RandomSearchStrategy(num_variations=5)
+
+    # 5. Set up and run the Optimizer
+    optimizer = Optimizer(
+        generator=generator,
+        evaluator=evaluator,
+        strategy=strategy,
+        data_mapper=data_mapper
+    )
+
+    # Define a simple dataset
+    dataset = [
+        {"prompt": "A robot who dreams of becoming a chef."},
+        {"prompt": "A magical forest where the trees can talk."}
+    ]
+
+    results = optimizer.run(trainset=dataset, valset=dataset)
+
+    print("\n--- Optimization Complete ---")
+    print(f"Final Score: {results.final_score:.4f}")
+    print("Best Prompt Found:")
+    print(results.best_generator.get_prompt_template())
+
+    print("\n--- History of Prompts Tried ---")
+    for item in results.history:
+        print(f"Score: {item['score']:.4f}, Prompt: {item['prompt']}")
 
 if __name__ == "__main__":
     main()
