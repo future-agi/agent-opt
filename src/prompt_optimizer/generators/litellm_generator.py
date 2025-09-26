@@ -2,6 +2,7 @@ import litellm
 from typing import Dict
 from ..base import BaseGenerator
 
+
 class LiteLLMGenerator(BaseGenerator):
     """
     A Generator that uses LiteLLM to call any supported language model.
@@ -32,10 +33,13 @@ class LiteLLMGenerator(BaseGenerator):
         """
         prompt = self.prompt_template.format(**prompt_vars)
         messages = [{"role": "user", "content": prompt}]
-        
+
         try:
             response = litellm.completion(model=self.model, messages=messages)
+            if response is None:
+                raise Exception("No content generated.")
             return response.choices[0].message.content
+
         except Exception as e:
             # Basic error handling
             print(f"An error occurred with LiteLLM: {e}")
