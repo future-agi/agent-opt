@@ -1,3 +1,3 @@
-from .base import Optimizer
+from .base import BaseOptimizer, DataMapper
 
-__all__ = ["Optimizer"]
+__all__ = ["BaseOptimizer", "DataMapper"]

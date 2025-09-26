@@ -1,9 +1,8 @@
 import os
 from dotenv import load_dotenv
 from fi.evals import Evaluator as AIEvaluator
-from prompt_optimizer import Optimizer
+from prompt_optimizer.optimizers import RandomSearchOptimizer
 from prompt_optimizer.generators import LiteLLMGenerator
-from prompt_optimizer.strategies import RandomSearchStrategy
 from prompt_optimizer.base import DataMapper
 
 def main():
@@ -30,27 +29,26 @@ def main():
     key_map = { "input": "prompt", "output": "generated_output" }
     data_mapper = DataMapper(key_map=key_map)
 
-    # 4. Set up the Optimization Strategy
-    strategy = RandomSearchStrategy(
-        teacher_model="gpt-5", 
-        num_variations=5
-    )
-
-    # 5. Set up and run the Optimizer
-    optimizer = Optimizer(
+    # 4. Set up and run the Optimizer
+    optimizer = RandomSearchOptimizer(
         generator=generator,
-        evaluator=evaluator,
-        strategy=strategy,
-        data_mapper=data_mapper
+        teacher_model="gpt-5", 
+        num_variations=5,
+        eval_template="summary_quality", # User can now specify the template
+        eval_model_name="turing_flash"   # And the evaluation model
     )
-
+    
     # Define a simple dataset
     dataset = [
         {"prompt": "A robot who dreams of becoming a chef."},
         {"prompt": "A magical forest where the trees can talk."}
     ]
 
-    results = optimizer.run(trainset=dataset, valset=dataset)
+    results = optimizer.optimize(
+        evaluator=evaluator,
+        data_mapper=data_mapper,
+        dataset=dataset
+    )
 
     print("\n--- Optimization Complete ---")
     if results.final_score > -1:
