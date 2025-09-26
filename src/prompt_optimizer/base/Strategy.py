@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any
 from .Generator import BaseGenerator
-from .dataclasses import OptimizationResult
+from .types import OptimizationResult
 from .mapper import DataMapper
+
 
 class BaseStrategy(ABC):
     """
@@ -17,7 +18,7 @@ class BaseStrategy(ABC):
         evaluator: Any,
         data_mapper: DataMapper,
         trainset: List[Dict[str, Any]],
-        valset: List[Dict[str, Any]]
+        valset: List[Dict[str, Any]],
     ) -> OptimizationResult:
         """
         Runs the optimization loop.

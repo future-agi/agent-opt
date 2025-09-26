@@ -1,8 +1,9 @@
 from typing import List, Dict, Any
 from .Generator import BaseGenerator
 from .Strategy import BaseStrategy
-from .dataclasses import OptimizationResult
+from .types import OptimizationResult
 from .mapper import DataMapper
+
 
 class Optimizer:
     """
@@ -13,9 +14,9 @@ class Optimizer:
     def __init__(
         self,
         generator: BaseGenerator,
-        evaluator: Any, # The user provides their own evaluator instance
+        evaluator: Any,  # The user provides their own evaluator instance
         strategy: BaseStrategy,
-        data_mapper: DataMapper
+        data_mapper: DataMapper,
     ):
         """
         Initializes the Optimizer.
@@ -32,17 +33,11 @@ class Optimizer:
         self.data_mapper = data_mapper
 
     def run(
-        self, 
-        trainset: List[Dict[str, Any]], 
-        valset: List[Dict[str, Any]]
+        self, trainset: List[Dict[str, Any]], valset: List[Dict[str, Any]]
     ) -> OptimizationResult:
         """
         Executes the optimization process using the provided strategy and data.
         """
         return self.strategy.optimize(
-            self.generator,
-            self.evaluator,
-            self.data_mapper,
-            trainset,
-            valset
+            self.generator, self.evaluator, self.data_mapper, trainset, valset
         )

@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any
 
+
 class BaseDataMapper(ABC):
     """
     Abstract base class for Data Mappers. A Data Mapper is responsible for
@@ -8,7 +9,9 @@ class BaseDataMapper(ABC):
     """
 
     @abstractmethod
-    def map(self, generated_output: str, ground_truth_example: Dict[str, Any]) -> Dict[str, Any]:
+    def map(
+        self, generated_output: str, ground_truth_example: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """
         Maps the generated output and a ground truth example to the format
         expected by the evaluator's `inputs`.
@@ -21,6 +24,7 @@ class BaseDataMapper(ABC):
             A dictionary formatted for the evaluator's `inputs` argument.
         """
         pass
+
 
 class DataMapper:
     """
@@ -41,7 +45,9 @@ class DataMapper:
         """
         self.key_map = key_map
 
-    def map(self, generated_output: str, ground_truth_example: Dict[str, Any]) -> Dict[str, Any]:
+    def map(
+        self, generated_output: str, ground_truth_example: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """
         Maps the data using the key_map provided during initialization.
 
@@ -54,5 +60,5 @@ class DataMapper:
                 mapped_data[new_key] = generated_output
             elif original_key in ground_truth_example:
                 mapped_data[new_key] = ground_truth_example[original_key]
-        
+
         return mapped_data
