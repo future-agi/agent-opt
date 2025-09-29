@@ -56,7 +56,7 @@ def main():
     optimizer = RandomSearchOptimizer(
         generator=generator,
         teacher_model="gemini/gemini-2.5-flash-lite",
-        num_variations=2,
+        num_variations=4,
     )
 
     # Define a simple dataset
