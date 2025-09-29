@@ -10,7 +10,7 @@ class BaseGenerator(ABC):
     """
 
     @abstractmethod
-    def generate(self, prompt_vars: Dict[str, str]) -> str:
+    def generate(self, prompt_vars: Dict[str, str], **kwargs) -> str:
         """
         Executes the generator with a given set of input variables.
 

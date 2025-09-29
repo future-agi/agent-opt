@@ -1,9 +1,10 @@
 import json
 import logging
 import random
-import time
-from typing import Any, Dict, List, Tuple
+import re
+from typing import Any, Dict, List, Optional, Set
 
+import numpy as np
 from pydantic import BaseModel, Field, ValidationError
 
 from ..base.base_generator import BaseGenerator
@@ -13,46 +14,41 @@ from ..base.evaluator import Evaluator
 from ..generators.litellm import LiteLLMGenerator
 from ..types import IterationHistory, OptimizationResult
 
-
 GET_GRADIENTS_PROMPT = """
 You are an expert in prompt engineering. I'm trying to write a zero-shot classifier prompt.
 My current prompt is:
 ---
 {prompt}
 ---
-
-This prompt failed on the following examples:
+This prompt performed poorly on the following examples:
 ---
 {error_examples}
 ---
-
-Provide {num_feedbacks} distinct reasons why the prompt could have failed on these examples.
-Each reason should be a concise critique of the prompt's structure or wording.
-
-Return a JSON object with a single key "variations" containing a list of strings.
-Each string in the list should be a critique.
+Provide {num_feedbacks} distinct reasons why the prompt could have failed. Each reason should be a concise critique.
+Return ONLY a valid JSON object with a single key "variations" containing a list of strings (the critiques).
 """
 
 APPLY_GRADIENT_PROMPT = """
 You are an expert in prompt engineering. I'm trying to improve a zero-shot classifier prompt.
-
 My current prompt is:
 ---
 {prompt}
 ---
-
-It failed on these examples:
+It performed poorly on these examples:
 ---
 {error_examples}
 ---
+A key reason for the failure is the following critique: "{feedback}"
+Based on this critique, generate {num_new_prompts} different, improved versions of the prompt.
+Return ONLY a valid JSON object with a single key "variations" containing a list of strings (the new prompts).
+"""
 
-A key reason for the failure is: "{feedback}"
-
-Based on this, generate {num_new_prompts} different, improved versions of the prompt.
-The new prompts should directly address the feedback.
-
-Return a JSON object with a single key "variations" containing a list of strings.
-Each string in the list should be a new prompt.
+PARAPHRASE_PROMPT = """
+Generate {num_variations} semantic paraphrases of the following prompt. The meaning should be identical, but the wording should be different.
+---
+{prompt}
+---
+Return ONLY a valid JSON object with a single key "variations" containing a list of strings (the paraphrased prompts).
 """
 
 
@@ -60,51 +56,74 @@ class GradientVariations(BaseModel):
     variations: List[str] = Field(description="A list of generated text strings.")
 
 
+class BanditSelector:
+    """Implements the UCB bandit algorithm for efficient prompt selection."""
+
+    def __init__(self, candidate_prompts: List[str], c: float = 2.0):
+        self.prompts = candidate_prompts
+        self.n_prompts = len(candidate_prompts)
+        self.c = c  # Exploration parameter
+        self.prompt_to_idx = {p: i for i, p in enumerate(self.prompts)}
+
+        self.counts = np.zeros(self.n_prompts)
+        self.scores = np.zeros(self.n_prompts)
+        self.total_pulls = 0
+
+    def select_arms(self, num_arms: int):
+        """Selects the best arms (prompts) to pull based on UCB scores."""
+        # Give every arm at least one chance
+        untested_indices = np.where(self.counts == 0)[0]
+        if len(untested_indices) > 0:
+            return [(i, self.prompts[i]) for i in untested_indices[:num_arms]]
+
+        # UCB calculation
+        average_scores = self.scores / self.counts
+        exploration_term = self.c * np.sqrt(np.log(self.total_pulls) / self.counts)
+        ucb_scores = average_scores + exploration_term
+
+        # Get the indices of the top arms
+        top_indices = np.argsort(ucb_scores)[-num_arms:][::-1]
+        return [(i, self.prompts[i]) for i in top_indices]
+
+    def update(self, prompt_idx: int, score: float, num_samples: int):
+        """Updates the scores and counts for a pulled arm."""
+        self.scores[prompt_idx] += score * num_samples
+        self.counts[prompt_idx] += num_samples
+        self.total_pulls += num_samples
+
+    def get_best_prompts(self, num_prompts: int) -> List[str]:
+        """Returns the top prompts based on their empirical average score."""
+        if self.n_prompts == 0:
+            return []
+        average_scores = np.divide(
+            self.scores,
+            self.counts,
+            out=np.zeros_like(self.scores),
+            where=self.counts != 0,
+        )
+        top_indices = np.argsort(average_scores)[-num_prompts:][::-1]
+        return [self.prompts[i] for i in top_indices]
+
+
 class ProTeGi(BaseOptimizer):
     """
-    Optimizes prompts using a "textual gradient" approach inspired by ProTeGi.
-
-    This method involves:
-    1. Finding examples where the current prompt fails.
-    2. Using a powerful "teacher" LLM to generate critiques ("gradients") of the prompt.
-    3. Using the teacher LLM again to rewrite the prompt based on those critiques.
+    A corrected and robust implementation of the ProTeGi optimizer.
     """
 
     def __init__(
         self,
-        teacher_generator: LiteLLMGenerator,
+        teacher_generator: BaseGenerator,
         num_gradients: int = 4,
         errors_per_gradient: int = 4,
         prompts_per_gradient: int = 1,
         beam_size: int = 4,
     ):
-        """
-        Initializes the Gradient Optimizer.
-
-        Args:
-            teacher_generator: A powerful generator (e.g., GPT-4, Claude 3 Opus)
-                used to generate critiques and new prompt variations.
-            num_gradients: The number of critiques to generate for each prompt.
-            errors_per_gradient: The number of failure examples to show the teacher
-                when generating a critique.
-            prompts_per_gradient: The number of new prompts to generate for each critique.
-            beam_size: The number of best prompts to keep for the next round.
-        """
         self.teacher = teacher_generator
         self.num_gradients = num_gradients
         self.errors_per_gradient = errors_per_gradient
         self.prompts_per_gradient = prompts_per_gradient
         self.beam_size = beam_size
-
-        super().__init__()
-
         logging.info("--- ProTeGi Optimizer Initialized ---")
-        logging.info(f"Teacher Model: {self.teacher.model_name}")
-        logging.info(f"Number of Gradients per Prompt: {self.num_gradients}")
-        logging.info(f"Errors per Gradient: {self.errors_per_gradient}")
-        logging.info(f"Prompts per Gradient: {self.prompts_per_gradient}")
-        logging.info(f"Beam Size: {self.beam_size}")
-        logging.info("------------------------------------")
 
     def optimize(
         self,
@@ -112,17 +131,14 @@ class ProTeGi(BaseOptimizer):
         data_mapper: BasicDataMapper,
         dataset: List[Dict[str, Any]],
         initial_prompts: List[str],
-        num_rounds: int = 3,
-        eval_subset_size: int = 32,
+        **kwargs: Any,
     ) -> OptimizationResult:
-        logging.info("--- Starting ProTeGi Prompt Optimization ---")
-        logging.info(f"Initial prompts: {len(initial_prompts)}")
-        logging.info(f"Number of rounds: {num_rounds}")
-        logging.info(f"Evaluation subset size: {eval_subset_size}")
+        num_rounds = kwargs.get("num_rounds", 3)
+        eval_subset_size = kwargs.get("eval_subset_size", 32)
 
-        candidates = initial_prompts
+        beam = set(initial_prompts)
         best_overall_score = -1.0
-        best_overall_prompt = initial_prompts[0]
+        best_overall_prompt = initial_prompts[0] if initial_prompts else ""
         history: List[IterationHistory] = []
 
         for round_num in range(num_rounds):
@@ -130,63 +146,48 @@ class ProTeGi(BaseOptimizer):
                 f"\n--- Starting Optimization Round {round_num + 1}/{num_rounds} ---"
             )
 
-            # 1. Expand the set of candidate prompts using textual gradients
+            # 1. EXPANSION: Generate new candidates from the current beam
+            current_prompts = list(beam)
             logging.info(
-                f"Expanding {len(candidates)} prompts into a new set of candidates..."
+                f"Expanding {len(current_prompts)} prompts into new candidates..."
             )
-            candidates = self._expand_candidates(
-                candidates, evaluator, data_mapper, dataset
-            )
-            logging.info(
-                f"Generated a new pool of {len(candidates)} candidate prompts."
+            expanded_prompts = self._expand_candidates(
+                current_prompts, evaluator, data_mapper, dataset
             )
 
-            # 2. Score all candidates to find the best ones for the next round
+            # The candidate pool for this round is the union of the old beam and new prompts
+            candidate_pool = beam.union(expanded_prompts)
             logging.info(
-                f"Scoring {len(candidates)} candidates on a subset of the data..."
+                f"Candidate pool for this round has {len(candidate_pool)} unique prompts."
             )
+
+            # 2. SELECTION: Score all candidates in the pool
             eval_subset = random.sample(dataset, min(len(dataset), eval_subset_size))
-            logging.info(f"Evaluation subset size for this round: {len(eval_subset)}")
-
             iteration_history = self._score_candidates(
-                candidates, evaluator, data_mapper, eval_subset
+                list(candidate_pool), evaluator, data_mapper, eval_subset
             )
             history.extend(iteration_history)
 
-            # 3. Select the top N prompts for the next round (beam search)
+            # 3. BEAM UPDATE: Select the top N prompts for the next round
             sorted_history = sorted(
                 iteration_history, key=lambda x: x.average_score, reverse=True
             )
-
             if not sorted_history:
-                logging.warning(
-                    "No successful evaluations in this round. Halting optimization."
-                )
+                logging.warning("No successful evaluations in this round. Halting.")
                 break
 
-            candidates = [item.prompt for item in sorted_history[: self.beam_size]]
+            beam = {item.prompt for item in sorted_history[: self.beam_size]}
             best_round_score = sorted_history[0].average_score
             best_round_prompt = sorted_history[0].prompt
 
             logging.info(f"Best score in round {round_num + 1}: {best_round_score:.4f}")
-            logging.info(f"Selected top {len(candidates)} prompts for the next round.")
+            logging.info(f"New beam selected with {len(beam)} prompts.")
 
             if best_round_score > best_overall_score:
                 best_overall_score = best_round_score
                 best_overall_prompt = best_round_prompt
-                logging.info(
-                    f"New best overall prompt found with score: {best_overall_score:.4f}"
-                )
 
-        final_best_generator = LiteLLMGenerator(
-            self.teacher.model_name, best_overall_prompt
-        )
-
-        logging.info("--- ProTeGi Prompt Optimization Finished ---")
-        logging.info(f"Final best score: {best_overall_score:.4f}")
-        logging.info(f"Final best prompt: \n{best_overall_prompt}")
-        logging.info("-----------------------------------------")
-
+        final_best_generator = LiteLLMGenerator("final-model", best_overall_prompt)
         return OptimizationResult(
             best_generator=final_best_generator,
             history=history,
@@ -199,38 +200,26 @@ class ProTeGi(BaseOptimizer):
         evaluator: Evaluator,
         data_mapper: BasicDataMapper,
         dataset: List[Dict[str, Any]],
-    ) -> List[str]:
-        """Generates new prompt variations based on critiques of failures."""
-        new_prompts = set(prompts)
-
+    ) -> Set[str]:
+        new_prompts = set()
         for i, prompt in enumerate(prompts):
-            logging.info(f"--> Expanding prompt {i + 1}/{len(prompts)}...")
-            # Find errors for the current prompt
+            logging.debug(f"--> Expanding prompt {i + 1}/{len(prompts)}...")
             errors = self._get_errors(prompt, evaluator, data_mapper, dataset)
             if not errors:
-                logging.info(
-                    f"Prompt produced no errors on the dataset sample. Keeping as is."
-                )
+                logging.debug(f"Prompt produced no errors. No expansion.")
                 continue
-            logging.info(f"Found {len(errors)} examples where the prompt failed.")
 
-            # Generate critiques ("gradients") based on these errors
             critiques = self._get_gradients(prompt, errors)
-            logging.info(f"Generated {len(critiques)} critiques (gradients).")
+            logging.debug(f"Generated {len(critiques)} critiques (gradients).")
 
-            # Generate new prompts by "applying" these critiques
-            for j, feedback in enumerate(critiques):
-                logging.info(
-                    f"Applying gradient {j + 1}/{len(critiques)}: '{feedback[:80]}...'"
-                )
+            for feedback in critiques:
                 generated = self._apply_gradient(prompt, errors, feedback)
-                logging.info(
-                    f"Generated {len(generated)} new prompts from this gradient."
-                )
-
-                new_prompts.update(generated)
-
-        return list(new_prompts)
+                if generated:
+                    logging.debug(
+                        f"Generated {len(generated)} new prompts from critique: '{feedback[:50]}...'"
+                    )
+                    new_prompts.update(generated)
+        return new_prompts
 
     def _get_errors(
         self,
@@ -238,77 +227,52 @@ class ProTeGi(BaseOptimizer):
         evaluator: Evaluator,
         data_mapper: BasicDataMapper,
         dataset: List[Dict[str, Any]],
-        sample_size: int = 64,
+        sample_size: int = 32,
     ) -> List[Dict[str, Any]]:
-        """Finds examples where the prompt results in a low score."""
         subset = random.sample(dataset, min(len(dataset), sample_size))
-        logging.info(f"Getting errors from a subset of {len(subset)} examples.")
-
-        # We need a temporary generator to evaluate the specific prompt
         temp_generator = LiteLLMGenerator("gpt-4o-mini", prompt)
 
-        start_time_gen = time.time()
         generated_outputs = [temp_generator.generate(example) for example in subset]
-        end_time_gen = time.time()
-        logging.info(
-            f"    Generation for error search took: {end_time_gen - start_time_gen:.2f}s"
-        )
-
         eval_inputs = [
             data_mapper.map(gen_out, ex)
             for gen_out, ex in zip(generated_outputs, subset)
         ]
-
-        start_time_eval = time.time()
         results = evaluator.evaluate(eval_inputs)
-        end_time_eval = time.time()
-        logging.info(
-            f"    Evaluation for error search took: {end_time_eval - start_time_eval:.2f}s"
-        )
 
         errors = [subset[i] for i, res in enumerate(results) if res.score < 0.5]
-        logging.info(f"Found {len(errors)} errors with score < 0.5.")
+        logging.debug(
+            f"Found {len(errors)} errors with score < 0.5 from a subset of {len(subset)}."
+        )
         return errors
 
     def _get_gradients(self, prompt: str, errors: List[Dict[str, Any]]) -> List[str]:
-        """Uses the teacher model to generate critiques of the prompt."""
         error_sample = random.sample(errors, min(len(errors), self.errors_per_gradient))
-        logging.info(f"Generating gradients from {len(error_sample)} error examples.")
-        error_examples_str = json.dumps(error_sample, indent=2)
-
-        prompt_vars = {
-            "prompt": prompt,
-            "error_examples": error_examples_str,
-            "num_feedbacks": self.num_gradients,
-        }
-
-        # We use a temporary generator for the teacher model call
-        critique_prompt = GET_GRADIENTS_PROMPT.format(**prompt_vars)
-        response_text = self.teacher.generate({"prompt": critique_prompt})
-
-        return self._parse_variations(response_text)
+        critique_prompt = GET_GRADIENTS_PROMPT.format(
+            prompt=prompt,
+            error_examples=json.dumps(error_sample, indent=2),
+            num_feedbacks=self.num_gradients,
+        )
+        response_text = self.teacher.generate(
+            prompt_vars={"prompt": critique_prompt},
+            response_format={"type": "json_object"},
+        )
+        return self._parse_variations_from_json(response_text)
 
     def _apply_gradient(
         self, prompt: str, errors: List[Dict[str, Any]], feedback: str
     ) -> List[str]:
-        """Uses the teacher model to rewrite the prompt based on a critique."""
         error_sample = random.sample(errors, min(len(errors), self.errors_per_gradient))
-        logging.info(
-            f"Applying gradient with {len(error_sample)} error examples and feedback: '{feedback[:80]}...'"
+        rewrite_prompt = APPLY_GRADIENT_PROMPT.format(
+            prompt=prompt,
+            error_examples=json.dumps(error_sample, indent=2),
+            feedback=feedback,
+            num_new_prompts=self.prompts_per_gradient,
         )
-        error_examples_str = json.dumps(error_sample, indent=2)
-
-        prompt_vars = {
-            "prompt": prompt,
-            "error_examples": error_examples_str,
-            "feedback": feedback,
-            "num_new_prompts": self.prompts_per_gradient,
-        }
-
-        rewrite_prompt = APPLY_GRADIENT_PROMPT.format(**prompt_vars)
-        response_text = self.teacher.generate({"prompt": rewrite_prompt})
-
-        return self._parse_variations(response_text)
+        response_text = self.teacher.generate(
+            prompt_vars={"prompt": rewrite_prompt},
+            response_format={"type": "json_object"},
+        )
+        return self._parse_variations_from_json(response_text)
 
     def _score_candidates(
         self,
@@ -317,34 +281,24 @@ class ProTeGi(BaseOptimizer):
         data_mapper: BasicDataMapper,
         dataset: List[Dict[str, Any]],
     ) -> List[IterationHistory]:
-        """Scores a list of prompts and returns the detailed history."""
         histories = []
         for i, prompt in enumerate(prompts):
-            logging.info(f"--> Scoring prompt {i + 1}/{len(prompts)}...")
+            logging.info(
+                f"--> Scoring prompt {i + 1}/{len(prompts)}: '{prompt[:100]}...'"
+            )
             temp_generator = LiteLLMGenerator("gpt-4o-mini", prompt)
-
-            start_time_gen = time.time()
             generated_outputs = [
                 temp_generator.generate(example) for example in dataset
             ]
-            end_time_gen = time.time()
-            logging.info(f"    Generation took: {end_time_gen - start_time_gen:.2f}s")
-
             eval_inputs = [
                 data_mapper.map(gen_out, ex)
                 for gen_out, ex in zip(generated_outputs, dataset)
             ]
-
-            start_time_eval = time.time()
             results = evaluator.evaluate(eval_inputs)
-            end_time_eval = time.time()
-            logging.info(f"    Evaluation took: {end_time_eval - start_time_eval:.2f}s")
-
             avg_score = (
                 sum(res.score for res in results) / len(results) if results else 0.0
             )
             logging.info(f"    Average score: {avg_score:.4f}")
-
             histories.append(
                 IterationHistory(
                     prompt=prompt, average_score=avg_score, individual_results=results
@@ -352,18 +306,17 @@ class ProTeGi(BaseOptimizer):
             )
         return histories
 
-    def _parse_variations(self, text: str) -> List[str]:
+    @staticmethod
+    def _parse_variations_from_json(text: str) -> List[str]:
         try:
-            # First, try to find a JSON code block
-            if "```json" in text:
-                json_str = text.split("```json")[1].split("```")[0].strip()
-                data = json.loads(json_str)
-                return GradientVariations.model_validate(data).variations
-
-            # If no code block, try to parse the whole string
-            return GradientVariations.model_validate_json(text).variations
-
-        except (json.JSONDecodeError, ValidationError, IndexError) as e:
-            logging.error(f"Failed to parse model output: {e}")
-            logging.error(f"Raw output:\n{text}")
+            match = re.search(r"\{.*\}", text, re.DOTALL)
+            if not match:
+                logging.warning(f"Could not find any JSON in the teacher's response.")
+                return []
+            json_str = match.group(0)
+            data = json.loads(json_str)
+            return GradientVariations.model_validate(data).variations
+        except (json.JSONDecodeError, ValidationError) as e:
+            logging.error(f"Failed to parse teacher model JSON response: {e}")
+            logging.debug(f"Raw problematic output:\n{text}")
             return []

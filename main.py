@@ -3,10 +3,9 @@ import logging
 import time
 from dotenv import load_dotenv
 from fi.evals import Evaluator as AIEvaluator
-from prompt_optimizer.optimizers import RandomSearchOptimizer
+from prompt_optimizer.optimizers import RandomSearchOptimizer, ProTeGi
 from prompt_optimizer.generators import LiteLLMGenerator
 from prompt_optimizer.datamappers import BasicDataMapper
-
 from prompt_optimizer.base.evaluator import Evaluator
 
 # Configure logging
@@ -53,25 +52,35 @@ def main():
 
     # 4. Set up the Optimizer
     logging.info("Setting up the Optimizer...")
-    optimizer = RandomSearchOptimizer(
-        generator=generator,
-        teacher_model="gemini/gemini-2.5-flash-lite",
-        num_variations=4,
+    # optimizer = RandomSearchOptimizer(
+    #     generator=generator,
+    #     teacher_model="gemini/gemini-2.5-flash-lite",
+    #     num_variations=4,
+    # )
+    # results = optimizer.optimize(
+    #     evaluator=evaluator, data_mapper=data_mapper, dataset=dataset
+    # )
+    optimizer = ProTeGi(
+        teacher_generator=LiteLLMGenerator(
+            "gemini/gemini-2.5-flash-lite", prompt_template=initial_prompt
+        )
     )
-
     # Define a simple dataset
     dataset = [
         {"prompt": "A robot who dreams of becoming a chef."},
         {"prompt": "A magical forest where the trees can talk."},
     ]
     logging.info(f"Using a dataset with {len(dataset)} examples.")
-
+    results = optimizer.optimize(
+        evaluator=evaluator,
+        data_mapper=data_mapper,
+        dataset=dataset,
+        initial_prompts=[initial_prompt],
+        num_rounds=1,
+    )
     # Run optimization
     logging.info("--- Starting Optimization Loop ---")
     optimization_start_time = time.time()
-    results = optimizer.optimize(
-        evaluator=evaluator, data_mapper=data_mapper, dataset=dataset
-    )
     optimization_end_time = time.time()
     logging.info(
         f"--- Optimization Loop Finished in {optimization_end_time - optimization_start_time:.2f} seconds ---"
