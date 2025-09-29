@@ -4,11 +4,13 @@ import time
 import json
 from pydantic import BaseModel, Field, ValidationError
 from typing import List, Dict, Any
+
+from ..base.evaluator import Evaluator
 from ..base.base_optimizer import BaseOptimizer
 from ..base.base_generator import BaseGenerator
 
 from ..datamappers import BasicDataMapper
-from ..types import OptimizationResult
+from ..types import IterationHistory, OptimizationResult
 
 
 class PromptVariations(BaseModel):
@@ -58,12 +60,13 @@ class RandomSearchOptimizer(BaseOptimizer):
 
     def optimize(
         self,
-        evaluator: Any,
+        evaluator: Evaluator,
         data_mapper: BasicDataMapper,
         dataset: List[Dict[str, Any]],
         **kwargs: Any,
     ) -> OptimizationResult:
         logging.info("--- Starting Random Search Optimization ---")
+        optimization_start_time = time.time()
 
         initial_prompt = self.generator.get_prompt_template()
         best_prompt = initial_prompt
@@ -76,61 +79,50 @@ class RandomSearchOptimizer(BaseOptimizer):
             iteration_start_time = time.time()
             logging.info(f"--- Testing Variation {i + 1}/{len(variations)} ---")
             logging.info(f"Prompt: {variation}")
-
             self.generator.set_prompt_template(variation)
 
-            scores = []
-            total_evaluation_time = 0
-            total_generation_time = 0
+            # Time generation
+            generation_start_time = time.time()
+            generated_outputs = [
+                self.generator.generate(example) for example in dataset
+            ]
+            generation_end_time = time.time()
+            logging.info(
+                f"Generation for {len(dataset)} examples took {generation_end_time - generation_start_time:.2f} seconds."
+            )
 
-            for example_idx, example in enumerate(dataset):
-                logging.info(f"Processing example {example_idx + 1}/{len(dataset)}")
+            eval_inputs = [
+                data_mapper.map(gen_output, example)
+                for gen_output, example in zip(generated_outputs, dataset)
+            ]
 
-                # Time generation
-                generation_start_time = time.time()
-                generated_output = self.generator.generate(example)
-                generation_end_time = time.time()
-                gen_time = generation_end_time - generation_start_time
-                total_generation_time += gen_time
-                logging.info(f"Generation took {gen_time:.2f} seconds.")
+            # Time evaluation
+            evaluation_start_time = time.time()
+            evaluation_results = evaluator.evaluate(eval_inputs)
+            evaluation_end_time = time.time()
+            logging.info(
+                f"Evaluation for {len(dataset)} examples took {evaluation_end_time - evaluation_start_time:.2f} seconds."
+            )
 
-                eval_inputs = data_mapper.map(generated_output, example)
-
-                # Time evaluation
-                evaluation_start_time = time.time()
-                eval_result = evaluator.evaluate(
-                    eval_templates=self.eval_template,
-                    inputs=eval_inputs,
-                    model_name=self.eval_model_name,
+            if not evaluation_results:
+                logging.warning(
+                    "No evaluation results were returned for this variation."
                 )
-                evaluation_end_time = time.time()
-                eval_time = evaluation_end_time - evaluation_start_time
-                total_evaluation_time += eval_time
-                logging.info(f"Evaluation took {eval_time:.2f} seconds.")
-
-                if eval_result.eval_results:
-                    score = eval_result.eval_results[0].output
-                    scores.append(score)
-                    logging.info(f"Score for example {example_idx + 1}: {score:.4f}")
-                else:
-                    logging.warning(
-                        f"No evaluation result for example {example_idx + 1}"
-                    )
-
-            if not scores:
-                logging.warning("No scores were recorded for this variation. Skipping.")
                 continue
 
-            avg_score = sum(scores) / len(scores)
-            logging.info(f"Average Score: {avg_score:.4f}")
-            logging.info(
-                f"Total generation time for this variation: {total_generation_time:.2f}s"
+            # Calculate average score for decision-making
+            avg_score = sum(res.score for res in evaluation_results) / len(
+                evaluation_results
             )
-            logging.info(
-                f"Total evaluation time for this variation: {total_evaluation_time:.2f}s"
-            )
+            logging.info(f"Average Score for Variation {i + 1}: {avg_score:.4f}")
 
-            history.append({"prompt": variation, "score": avg_score})
+            history.append(
+                IterationHistory(
+                    prompt=variation,
+                    average_score=avg_score,
+                    individual_results=evaluation_results,
+                )
+            )
 
             if avg_score > best_score:
                 best_score = avg_score
@@ -144,10 +136,13 @@ class RandomSearchOptimizer(BaseOptimizer):
 
         self.generator.set_prompt_template(best_prompt)
 
+        optimization_end_time = time.time()
+        logging.info(
+            f"--- Random Search Optimization finished in {optimization_end_time - optimization_start_time:.2f} seconds ---"
+        )
+
         return OptimizationResult(
-            best_generator=self.generator,
-            history=history,
-            final_score=best_score,
+            best_generator=self.generator, history=history, final_score=best_score
         )
 
     def _generate_variations(self, initial_prompt: str) -> List[str]:

@@ -7,6 +7,8 @@ from prompt_optimizer.optimizers import RandomSearchOptimizer
 from prompt_optimizer.generators import LiteLLMGenerator
 from prompt_optimizer.datamappers import BasicDataMapper
 
+from prompt_optimizer.base.evaluator import Evaluator
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -33,10 +35,17 @@ def main():
 
     # 2. Set up the Evaluator
     logging.info("Setting up the Evaluator...")
-    evaluator = AIEvaluator(
-        fi_api_key=os.getenv("FI_API_KEY"), fi_secret_key=os.getenv("FI_SECRET_KEY")
-    )
 
+    # evaluator = AIEvaluator(
+    #     fi_api_key=os.getenv("FI_API_KEY"), fi_secret_key=os.getenv("FI_SECRET_KEY")
+    # )
+
+    evaluator = Evaluator(
+        fi_api_key=os.getenv("FI_API_KEY"),
+        fi_secret_key=os.getenv("FI_SECRET_KEY"),
+        eval_template="summary_quality",
+        eval_model_name="turing_flash",
+    )
     # 3. Set up the Data Mapper
     logging.info("Setting up the Data Mapper...")
     key_map = {"input": "prompt", "output": "generated_output"}
@@ -47,9 +56,7 @@ def main():
     optimizer = RandomSearchOptimizer(
         generator=generator,
         teacher_model="gemini/gemini-2.5-flash-lite",
-        num_variations=3,
-        eval_template="summary_quality",
-        eval_model_name="turing_flash",
+        num_variations=2,
     )
 
     # Define a simple dataset
@@ -72,13 +79,20 @@ def main():
 
     # Process and log results
     if results and results.final_score > -1:
-        logging.info(f"Final Score: {results.final_score:.4f}")
-        logging.info("Best Prompt Found:")
+        logging.info(f"🏆 Final Best Score: {results.final_score:.4f}")
+        logging.info("🏆 Best Prompt Found:")
         logging.info(results.best_generator.get_prompt_template())
 
-        logging.info("--- History of Prompts Tried ---")
-        for item in results.history:
-            logging.info(f"Score: {item['score']:.4f}, Prompt: {item['prompt']}")
+        logging.info("\n--- 📜 Full Optimization History ---")
+        for i, iteration in enumerate(results.history):
+            logging.info(f"\n  --- Iteration {i + 1} ---")
+            logging.info(f"  Prompt: {iteration.prompt}")
+            logging.info(f"  Average Score: {iteration.average_score:.4f}")
+            logging.info("  Individual Results:")
+            for j, res in enumerate(iteration.individual_results):
+                logging.info(
+                    f"    - Example {j + 1} Score: {res.score:.2f}, Reason: {res.reason}"
+                )
     else:
         logging.warning("Optimization did not find a successful prompt.")
 
