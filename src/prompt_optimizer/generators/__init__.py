@@ -1,3 +1,3 @@
-from .litellm_generator import LiteLLMGenerator
+from .litellm import LiteLLMGenerator
 
 __all__ = ["LiteLLMGenerator"]

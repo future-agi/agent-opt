@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any, Callable
-from .dataclasses import OptimizationResult
+from ..types import OptimizationResult
+
 
 class BaseOptimizer(ABC):
     """
@@ -13,10 +14,10 @@ class BaseOptimizer(ABC):
     def optimize(
         self,
         evaluator: Any,
-        data_mapper: Any, # We'll refine this later
+        data_mapper: Any,  # We'll refine this later
         dataset: List[Dict[str, Any]],
         metric: Callable,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> OptimizationResult:
         """
         Runs the full optimization process.

@@ -1,6 +1,9 @@
 import litellm
-from typing import Dict
-from ..base import BaseGenerator
+from typing import Dict, List
+
+from ..types import LLMMessage
+from ..base.base_generator import BaseGenerator
+
 
 class LiteLLMGenerator(BaseGenerator):
     """
@@ -20,21 +23,28 @@ class LiteLLMGenerator(BaseGenerator):
         self.prompt_template = prompt_template
         # LiteLLM is stateless, so no further setup is needed here.
 
-    def generate(self, prompt_vars: Dict[str, str]) -> str:
+    def generate(self, prompt_vars: Dict[str, str], **litellm_kwargs) -> str:
         """
         Fills the prompt template and calls the LiteLLM API.
 
         Args:
             prompt_vars: A dictionary of variables to fill the prompt template.
+            litellm_kwargs: Any litellm supported kwargs
 
         Returns:
             The string content of the model's response.
         """
         prompt = self.prompt_template.format(**prompt_vars)
-        messages = [{"role": "user", "content": prompt}]
-        
+
+        messages = [LLMMessage(role="user", content=prompt)]
+        messages_for_litellm = [msg.model_dump(exclude_none=True) for msg in messages]
+
         try:
-            response = litellm.completion(model=self.model, messages=messages)
+            # litellm allows us to drop any params which may not be supported by the model
+            litellm.drop_params = True
+            response = litellm.completion(
+                model=self.model, messages=messages_for_litellm, **litellm_kwargs
+            )
             return response.choices[0].message.content
         except Exception as e:
             # Basic error handling
