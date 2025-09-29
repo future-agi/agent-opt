@@ -10,6 +10,9 @@ class BaseOptimizer(ABC):
     containing the full logic for its optimization loop.
     """
 
+    def __init__(self) -> None:
+        super().__init__()
+
     @abstractmethod
     def optimize(
         self,

@@ -51,6 +51,10 @@ class LiteLLMGenerator(BaseGenerator):
             print(f"An error occurred with LiteLLM: {e}")
             return ""
 
+    @property
+    def model_name(self) -> str:
+        return self.model
+
     def get_prompt_template(self) -> str:
         """Returns the current prompt template."""
         return self.prompt_template

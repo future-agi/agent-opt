@@ -58,6 +58,8 @@ class RandomSearchOptimizer(BaseOptimizer):
         else:
             self.teacher_model_kwargs = teacher_model_kwargs or {}
 
+        super().__init__()
+
     def optimize(
         self,
         evaluator: Evaluator,
