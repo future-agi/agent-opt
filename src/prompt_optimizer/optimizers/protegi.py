@@ -112,7 +112,7 @@ class ProTeGi(BaseOptimizer):
 
     def __init__(
         self,
-        teacher_generator: BaseGenerator,
+        teacher_generator: LiteLLMGenerator,
         num_gradients: int = 4,
         errors_per_gradient: int = 4,
         prompts_per_gradient: int = 1,
@@ -187,7 +187,9 @@ class ProTeGi(BaseOptimizer):
                 best_overall_score = best_round_score
                 best_overall_prompt = best_round_prompt
 
-        final_best_generator = LiteLLMGenerator("final-model", best_overall_prompt)
+        final_best_generator = LiteLLMGenerator(
+            self.teacher.model_name, best_overall_prompt
+        )
         return OptimizationResult(
             best_generator=final_best_generator,
             history=history,
