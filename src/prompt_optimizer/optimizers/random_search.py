@@ -1,4 +1,6 @@
 import litellm
+import logging
+import time
 from typing import List, Dict, Any
 from ..base.base_optimizer import BaseOptimizer
 from ..base.base_generator import BaseGenerator
@@ -51,7 +53,7 @@ class RandomSearchOptimizer(BaseOptimizer):
         dataset: List[Dict[str, Any]],
         **kwargs: Any,
     ) -> OptimizationResult:
-        print("--- Starting Random Search Optimization ---")
+        logging.info("--- Starting Random Search Optimization ---")
 
         initial_prompt = self.generator.get_prompt_template()
         best_prompt = initial_prompt
@@ -61,37 +63,76 @@ class RandomSearchOptimizer(BaseOptimizer):
         variations = self._generate_variations(initial_prompt)
 
         for i, variation in enumerate(variations):
-            print(f"\n--- Testing Variation {i + 1}/{len(variations)} ---")
-            print(f"Prompt: {variation}")
+            iteration_start_time = time.time()
+            logging.info(f"--- Testing Variation {i + 1}/{len(variations)} ---")
+            logging.info(f"Prompt: {variation}")
 
             self.generator.set_prompt_template(variation)
 
             scores = []
-            for example in dataset:
+            total_evaluation_time = 0
+            total_generation_time = 0
+
+            for example_idx, example in enumerate(dataset):
+                logging.info(f"Processing example {example_idx + 1}/{len(dataset)}")
+
+                # Time generation
+                generation_start_time = time.time()
                 generated_output = self.generator.generate(example)
+                generation_end_time = time.time()
+                gen_time = generation_end_time - generation_start_time
+                total_generation_time += gen_time
+                logging.info(f"Generation took {gen_time:.2f} seconds.")
+
                 eval_inputs = data_mapper.map(generated_output, example)
 
+                # Time evaluation
+                evaluation_start_time = time.time()
                 eval_result = evaluator.evaluate(
                     eval_templates=self.eval_template,
                     inputs=eval_inputs,
                     model_name=self.eval_model_name,
                 )
+                evaluation_end_time = time.time()
+                eval_time = evaluation_end_time - evaluation_start_time
+                total_evaluation_time += eval_time
+                logging.info(f"Evaluation took {eval_time:.2f} seconds.")
 
                 if eval_result.eval_results:
-                    scores.append(eval_result.eval_results[0].output)
+                    score = eval_result.eval_results[0].output
+                    scores.append(score)
+                    logging.info(f"Score for example {example_idx + 1}: {score:.4f}")
+                else:
+                    logging.warning(
+                        f"No evaluation result for example {example_idx + 1}"
+                    )
 
             if not scores:
+                logging.warning(
+                    "No scores were recorded for this variation. Skipping."
+                )
                 continue
 
             avg_score = sum(scores) / len(scores)
-            print(f"Average Score: {avg_score:.4f}")
+            logging.info(f"Average Score: {avg_score:.4f}")
+            logging.info(
+                f"Total generation time for this variation: {total_generation_time:.2f}s"
+            )
+            logging.info(
+                f"Total evaluation time for this variation: {total_evaluation_time:.2f}s"
+            )
 
             history.append({"prompt": variation, "score": avg_score})
 
             if avg_score > best_score:
                 best_score = avg_score
                 best_prompt = variation
-                print("--- New Best Prompt Found! ---")
+                logging.info("--- New Best Prompt Found! ---")
+
+            iteration_end_time = time.time()
+            logging.info(
+                f"--- Variation {i + 1} finished in {iteration_end_time - iteration_start_time:.2f} seconds ---"
+            )
 
         self.generator.set_prompt_template(best_prompt)
 
@@ -102,7 +143,7 @@ class RandomSearchOptimizer(BaseOptimizer):
         )
 
     def _generate_variations(self, initial_prompt: str) -> List[str]:
-        print(
+        logging.info(
             f"Generating {self.num_variations} prompt variations with teacher model: {self.teacher_model}..."
         )
 
@@ -120,7 +161,9 @@ class RandomSearchOptimizer(BaseOptimizer):
 
         try:
             response = litellm.completion(
-                model=self.teacher_model, messages=messages, **self.teacher_model_kwargs
+                model=self.teacher_model,
+                messages=messages,
+                **self.teacher_model_kwargs,
             )
             response_content = response.choices[0].message.content
             variations = eval(response_content)
@@ -133,5 +176,5 @@ class RandomSearchOptimizer(BaseOptimizer):
                     "Teacher model did not return a valid list of strings."
                 )
         except Exception as e:
-            print(f"An error occurred with the teacher model: {e}")
+            logging.error(f"An error occurred with the teacher model: {e}")
             return [initial_prompt + " Be creative."]
