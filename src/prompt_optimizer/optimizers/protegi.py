@@ -1,6 +1,7 @@
 import json
 import logging
 import random
+import time
 from typing import Any, Dict, List, Tuple
 
 from pydantic import BaseModel, Field, ValidationError
@@ -246,13 +247,24 @@ class ProTeGi(BaseOptimizer):
         # We need a temporary generator to evaluate the specific prompt
         temp_generator = LiteLLMGenerator("gpt-4o-mini", prompt)
 
+        start_time_gen = time.time()
         generated_outputs = [temp_generator.generate(example) for example in subset]
+        end_time_gen = time.time()
+        logging.info(
+            f"    Generation for error search took: {end_time_gen - start_time_gen:.2f}s"
+        )
+
         eval_inputs = [
             data_mapper.map(gen_out, ex)
             for gen_out, ex in zip(generated_outputs, subset)
         ]
 
+        start_time_eval = time.time()
         results = evaluator.evaluate(eval_inputs)
+        end_time_eval = time.time()
+        logging.info(
+            f"    Evaluation for error search took: {end_time_eval - start_time_eval:.2f}s"
+        )
 
         errors = [subset[i] for i, res in enumerate(results) if res.score < 0.5]
         logging.info(f"Found {len(errors)} errors with score < 0.5.")
@@ -310,15 +322,24 @@ class ProTeGi(BaseOptimizer):
         for i, prompt in enumerate(prompts):
             logging.info(f"--> Scoring prompt {i + 1}/{len(prompts)}...")
             temp_generator = LiteLLMGenerator("gpt-4o-mini", prompt)
+
+            start_time_gen = time.time()
             generated_outputs = [
                 temp_generator.generate(example) for example in dataset
             ]
+            end_time_gen = time.time()
+            logging.info(f"    Generation took: {end_time_gen - start_time_gen:.2f}s")
+
             eval_inputs = [
                 data_mapper.map(gen_out, ex)
                 for gen_out, ex in zip(generated_outputs, dataset)
             ]
 
+            start_time_eval = time.time()
             results = evaluator.evaluate(eval_inputs)
+            end_time_eval = time.time()
+            logging.info(f"    Evaluation took: {end_time_eval - start_time_eval:.2f}s")
+
             avg_score = (
                 sum(res.score for res in results) / len(results) if results else 0.0
             )
