@@ -12,10 +12,7 @@ from ..base.evaluator import Evaluator
 from ..generators.litellm import LiteLLMGenerator
 from ..types import IterationHistory, OptimizationResult
 
-# ==============================================================================
-# Constants for Prompts used by the Optimizer
-# ==============================================================================
-
+# = not a constant, but a helper
 GET_GRADIENTS_PROMPT = """
 You are an expert in prompt engineering. I'm trying to write a zero-shot classifier prompt.
 My current prompt is:
@@ -30,7 +27,9 @@ This prompt failed on the following examples:
 
 Provide {num_feedbacks} distinct reasons why the prompt could have failed on these examples.
 Each reason should be a concise critique of the prompt's structure or wording.
-Wrap each reason with <START> and <END>.
+
+Return a JSON object with a single key "variations" containing a list of strings.
+Each string in the list should be a critique.
 """
 
 APPLY_GRADIENT_PROMPT = """
@@ -50,7 +49,9 @@ A key reason for the failure is: "{feedback}"
 
 Based on this, generate {num_new_prompts} different, improved versions of the prompt.
 The new prompts should directly address the feedback.
-Wrap each new prompt with <START> and <END>.
+
+Return a JSON object with a single key "variations" containing a list of strings.
+Each string in the list should be a new prompt.
 """
 
 
@@ -201,7 +202,8 @@ class ProTeGi(BaseOptimizer):
         """Generates new prompt variations based on critiques of failures."""
         new_prompts = set(prompts)
 
-        for prompt in prompts:
+        for i, prompt in enumerate(prompts):
+            logging.info(f"--> Expanding prompt {i + 1}/{len(prompts)}...")
             # Find errors for the current prompt
             errors = self._get_errors(prompt, evaluator, data_mapper, dataset)
             if not errors:
@@ -209,13 +211,22 @@ class ProTeGi(BaseOptimizer):
                     f"Prompt produced no errors on the dataset sample. Keeping as is."
                 )
                 continue
+            logging.info(f"Found {len(errors)} examples where the prompt failed.")
 
             # Generate critiques ("gradients") based on these errors
             critiques = self._get_gradients(prompt, errors)
+            logging.info(f"Generated {len(critiques)} critiques (gradients).")
 
             # Generate new prompts by "applying" these critiques
-            for feedback in critiques:
+            for j, feedback in enumerate(critiques):
+                logging.info(
+                    f"Applying gradient {j + 1}/{len(critiques)}: '{feedback[:80]}...'"
+                )
                 generated = self._apply_gradient(prompt, errors, feedback)
+                logging.info(
+                    f"Generated {len(generated)} new prompts from this gradient."
+                )
+
                 new_prompts.update(generated)
 
         return list(new_prompts)
@@ -230,6 +241,7 @@ class ProTeGi(BaseOptimizer):
     ) -> List[Dict[str, Any]]:
         """Finds examples where the prompt results in a low score."""
         subset = random.sample(dataset, min(len(dataset), sample_size))
+        logging.info(f"Getting errors from a subset of {len(subset)} examples.")
 
         # We need a temporary generator to evaluate the specific prompt
         temp_generator = LiteLLMGenerator("gpt-4o-mini", prompt)
@@ -243,11 +255,13 @@ class ProTeGi(BaseOptimizer):
         results = evaluator.evaluate(eval_inputs)
 
         errors = [subset[i] for i, res in enumerate(results) if res.score < 0.5]
+        logging.info(f"Found {len(errors)} errors with score < 0.5.")
         return errors
 
     def _get_gradients(self, prompt: str, errors: List[Dict[str, Any]]) -> List[str]:
         """Uses the teacher model to generate critiques of the prompt."""
         error_sample = random.sample(errors, min(len(errors), self.errors_per_gradient))
+        logging.info(f"Generating gradients from {len(error_sample)} error examples.")
         error_examples_str = json.dumps(error_sample, indent=2)
 
         prompt_vars = {
@@ -260,13 +274,16 @@ class ProTeGi(BaseOptimizer):
         critique_prompt = GET_GRADIENTS_PROMPT.format(**prompt_vars)
         response_text = self.teacher.generate({"prompt": critique_prompt})
 
-        return self._parse_tagged_text(response_text, "<START>", "<END>")
+        return self._parse_variations(response_text)
 
     def _apply_gradient(
         self, prompt: str, errors: List[Dict[str, Any]], feedback: str
     ) -> List[str]:
         """Uses the teacher model to rewrite the prompt based on a critique."""
         error_sample = random.sample(errors, min(len(errors), self.errors_per_gradient))
+        logging.info(
+            f"Applying gradient with {len(error_sample)} error examples and feedback: '{feedback[:80]}...'"
+        )
         error_examples_str = json.dumps(error_sample, indent=2)
 
         prompt_vars = {
@@ -279,7 +296,7 @@ class ProTeGi(BaseOptimizer):
         rewrite_prompt = APPLY_GRADIENT_PROMPT.format(**prompt_vars)
         response_text = self.teacher.generate({"prompt": rewrite_prompt})
 
-        return self._parse_tagged_text(response_text, "<START>", "<END>")
+        return self._parse_variations(response_text)
 
     def _score_candidates(
         self,
@@ -290,7 +307,8 @@ class ProTeGi(BaseOptimizer):
     ) -> List[IterationHistory]:
         """Scores a list of prompts and returns the detailed history."""
         histories = []
-        for prompt in prompts:
+        for i, prompt in enumerate(prompts):
+            logging.info(f"--> Scoring prompt {i + 1}/{len(prompts)}...")
             temp_generator = LiteLLMGenerator("gpt-4o-mini", prompt)
             generated_outputs = [
                 temp_generator.generate(example) for example in dataset
@@ -304,6 +322,7 @@ class ProTeGi(BaseOptimizer):
             avg_score = (
                 sum(res.score for res in results) / len(results) if results else 0.0
             )
+            logging.info(f"    Average score: {avg_score:.4f}")
 
             histories.append(
                 IterationHistory(
@@ -312,13 +331,18 @@ class ProTeGi(BaseOptimizer):
             )
         return histories
 
-    @staticmethod
-    def _parse_tagged_text(text: str, start_tag: str, end_tag: str) -> List[str]:
-        """A simple utility to parse text between start and end tags."""
-        return [
-            part.strip()
-            for part in text.split(start_tag)
-            if end_tag in part
-            for part in part.split(end_tag)
-            if part.strip()
-        ]
+    def _parse_variations(self, text: str) -> List[str]:
+        try:
+            # First, try to find a JSON code block
+            if "```json" in text:
+                json_str = text.split("```json")[1].split("```")[0].strip()
+                data = json.loads(json_str)
+                return GradientVariations.model_validate(data).variations
+
+            # If no code block, try to parse the whole string
+            return GradientVariations.model_validate_json(text).variations
+
+        except (json.JSONDecodeError, ValidationError, IndexError) as e:
+            logging.error(f"Failed to parse model output: {e}")
+            logging.error(f"Raw output:\n{text}")
+            return []
