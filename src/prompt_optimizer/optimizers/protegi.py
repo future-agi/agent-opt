@@ -12,7 +12,7 @@ from ..base.evaluator import Evaluator
 from ..generators.litellm import LiteLLMGenerator
 from ..types import IterationHistory, OptimizationResult
 
-# = not a constant, but a helper
+
 GET_GRADIENTS_PROMPT = """
 You are an expert in prompt engineering. I'm trying to write a zero-shot classifier prompt.
 My current prompt is:
