@@ -46,8 +46,8 @@ def main():
     logging.info("Setting up the Optimizer...")
     optimizer = RandomSearchOptimizer(
         generator=generator,
-        teacher_model="gpt-5",
-        num_variations=5,
+        teacher_model="gemini/gemini-2.5-flash-lite",
+        num_variations=3,
         eval_template="summary_quality",
         eval_model_name="turing_flash",
     )

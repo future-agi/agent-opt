@@ -25,7 +25,7 @@ class OptimizationResult(BaseModel):
     """Output Model to hold the results of an optimization run."""
 
     best_generator: BaseGenerator
-    message_history: List[Dict[str, str]]
+    history: List[Dict[str, Any]]
     final_score: float = 0.0
 
     model_config = {"arbitrary_types_allowed": True}
