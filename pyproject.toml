@@ -10,9 +10,10 @@ authors = [
 ]
 description = "A library for prompt optimization."
 readme = "README.md"
-requires-python = ">3.9"
+requires-python = ">=3.10"
 dependencies = [
     "ai-evaluation>=0.1.8",
+    "gepa>=0.0.17",
     "litellm>=1.35.2",
     "numpy>=1.26.4",
     "openai>=1.108.2",

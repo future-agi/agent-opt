@@ -1,7 +1,7 @@
 import json
 import logging
 import random
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, List, Optional, Set
 
 from pydantic import BaseModel, Field, ValidationError
 
@@ -69,7 +69,7 @@ class MetaPromptOptimizer(BaseOptimizer):
     performance and rewrite it. This is inspired by the `promptim` library.
     """
 
-    def __init__(self, teacher_generator: BaseGenerator):
+    def __init__(self, teacher_generator: LiteLLMGenerator):
         """
         Initializes the MetaPrompt Optimizer.
 
@@ -85,11 +85,10 @@ class MetaPromptOptimizer(BaseOptimizer):
         data_mapper: BasicDataMapper,
         dataset: List[Dict[str, Any]],
         initial_prompts: List[str],
-        **kwargs: Any,
+        task_description: str = "I want to improve my prompt.",
+        num_rounds: Optional[int] = 5,
+        eval_subset_size: Optional[int] = 40,
     ) -> OptimizationResult:
-        num_rounds = kwargs.get("num_rounds", 5)
-        eval_subset_size = kwargs.get("eval_subset_size", 40)
-
         logging.info("--- Starting Meta-Prompt Optimization ---")
 
         if not initial_prompts:
@@ -137,10 +136,7 @@ class MetaPromptOptimizer(BaseOptimizer):
                 current_prompt=current_prompt,
                 other_attempts=other_attempts_str,
                 annotated_results=annotated_results_str,
-                task_description=kwargs.get(
-                    "task_description",
-                    "The user has not provided a detailed task description.",
-                ),
+                task_description=task_description,
             )
 
             logging.debug("Generating new prompt with meta-prompt...")
@@ -159,7 +155,7 @@ class MetaPromptOptimizer(BaseOptimizer):
                     f"Failed to parse new prompt from teacher model, keeping current prompt. Error: {e}"
                 )
 
-        final_best_generator = LiteLLMGenerator("final-model", best_prompt)
+        final_best_generator = LiteLLMGenerator(self.teacher.model_name, best_prompt)
         return OptimizationResult(
             best_generator=final_best_generator,
             history=history,

@@ -3,7 +3,12 @@ import logging
 import time
 from dotenv import load_dotenv
 from fi.evals import Evaluator as AIEvaluator
-from prompt_optimizer.optimizers import RandomSearchOptimizer, ProTeGi
+from prompt_optimizer.optimizers import (
+    RandomSearchOptimizer,
+    ProTeGi,
+    MetaPromptOptimizer,
+    GEPAOptimizer,
+)
 from prompt_optimizer.generators import LiteLLMGenerator
 from prompt_optimizer.datamappers import BasicDataMapper
 from prompt_optimizer.base.evaluator import Evaluator
@@ -14,7 +19,7 @@ logging.basicConfig(
 )
 
 
-def main():
+def main() -> None:
     """Main function to run the prompt optimization."""
     logging.info("--- Starting Prompt Optimization ---")
     start_time = time.time()
@@ -29,7 +34,7 @@ def main():
 
     # 1. Set up the Generator
     logging.info("Setting up the Generator...")
-    initial_prompt = "Write a short story based on the following idea: {prompt}"
+    initial_prompt = "Summarize in exactly one sentence: {text}"
     generator = LiteLLMGenerator(model="gpt-4o-mini", prompt_template=initial_prompt)
 
     # 2. Set up the Evaluator
@@ -47,7 +52,7 @@ def main():
     )
     # 3. Set up the Data Mapper
     logging.info("Setting up the Data Mapper...")
-    key_map = {"input": "prompt", "output": "generated_output"}
+    key_map = {"input": "text", "output": "generated_output"}
     data_mapper = BasicDataMapper(key_map=key_map)
 
     # 4. Set up the Optimizer
@@ -60,15 +65,38 @@ def main():
     # results = optimizer.optimize(
     #     evaluator=evaluator, data_mapper=data_mapper, dataset=dataset
     # )
-    optimizer = ProTeGi(
-        teacher_generator=LiteLLMGenerator(
-            "gemini/gemini-2.5-flash-lite", prompt_template=initial_prompt
-        )
-    )
+    # optimizer = ProTeGi(
+    #     teacher_generator=LiteLLMGenerator(
+    #         "gemini/gemini-2.5-flash-lite", prompt_template=initial_prompt
+    #     )
+    # ))
+    optimizer = GEPAOptimizer(reflection_model="gpt-5")
     # Define a simple dataset
     dataset = [
-        {"prompt": "A robot who dreams of becoming a chef."},
-        {"prompt": "A magical forest where the trees can talk."},
+        {
+            "text": "The sun is a star at the center of the Solar System. It is a nearly perfect sphere of hot plasma, with internal convective motion that generates a magnetic field via a dynamo process."
+        },
+        {
+            "text": "Python is an interpreted, high-level and general-purpose programming language. Python's design philosophy emphasizes code readability with its notable use of significant whitespace."
+        },
+        {
+            "text": "The mitochondria is the powerhouse of the cell, responsible for generating most of the cell's supply of adenosine triphosphate (ATP), used as a source of chemical energy."
+        },
+        {
+            "text": "The Roman Empire was the post-Republican period of ancient Rome. As a polity it included large territorial holdings around the Mediterranean Sea in Europe, Northern Africa, and Western Asia ruled by emperors."
+        },
+        {
+            "text": "Artificial intelligence (AI) is intelligence demonstrated by machines, unlike the natural intelligence displayed by humans and animals, which involves consciousness and emotionality."
+        },
+        {
+            "text": "To Kill a Mockingbird is a novel by Harper Lee published in 1960. Instantly successful, widely read in high schools and middle schools in the United States, it has become a classic of modern American literature, winning the Pulitzer Prize."
+        },
+        {
+            "text": "Supply and demand is a microeconomic model of price determination in a market. It postulates that, holding all else equal, in a competitive market, the unit price for a particular good, or other traded item such as labor or liquid financial assets, will vary until it settles at a point where the quantity demanded will equal the quantity supplied."
+        },
+        {
+            "text": "Quantum mechanics is a fundamental theory in physics that provides a description of the physical properties of nature at the scale of atoms and subatomic particles. It is the foundation of all quantum physics including quantum chemistry, quantum field theory, quantum technology, and quantum information science."
+        },
     ]
     logging.info(f"Using a dataset with {len(dataset)} examples.")
     results = optimizer.optimize(
@@ -76,7 +104,7 @@ def main():
         data_mapper=data_mapper,
         dataset=dataset,
         initial_prompts=[initial_prompt],
-        num_rounds=1,
+        max_metric_calls=20,
     )
     # Run optimization
     logging.info("--- Starting Optimization Loop ---")
