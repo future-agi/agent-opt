@@ -2,13 +2,7 @@ import os
 import logging
 import time
 from dotenv import load_dotenv
-from fi.evals import Evaluator as AIEvaluator
-from prompt_optimizer.optimizers import (
-    RandomSearchOptimizer,
-    ProTeGi,
-    MetaPromptOptimizer,
-    GEPAOptimizer,
-)
+from prompt_optimizer.optimizers import BayesianSearchOptimizer
 from prompt_optimizer.generators import LiteLLMGenerator
 from prompt_optimizer.datamappers import BasicDataMapper
 from prompt_optimizer.base.evaluator import Evaluator
@@ -18,8 +12,7 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-
-def main() -> None:
+def main():
     """Main function to run the prompt optimization."""
     logging.info("--- Starting Prompt Optimization ---")
     start_time = time.time()
@@ -34,22 +27,20 @@ def main() -> None:
 
     # 1. Set up the Generator
     logging.info("Setting up the Generator...")
-    initial_prompt = "Summarize in exactly one sentence: {text}"
+    initial_prompt = (
+        "Summarize the following article in 3-4 concise bullet points capturing key facts: {text}"
+    )
     generator = LiteLLMGenerator(model="gpt-4o-mini", prompt_template=initial_prompt)
 
     # 2. Set up the Evaluator
     logging.info("Setting up the Evaluator...")
-
-    # evaluator = AIEvaluator(
-    #     fi_api_key=os.getenv("FI_API_KEY"), fi_secret_key=os.getenv("FI_SECRET_KEY")
-    # )
-
     evaluator = Evaluator(
         fi_api_key=os.getenv("FI_API_KEY"),
         fi_secret_key=os.getenv("FI_SECRET_KEY"),
-        eval_template="summary_quality",
+        eval_template="task_completion",
         eval_model_name="turing_flash",
     )
+    
     # 3. Set up the Data Mapper
     logging.info("Setting up the Data Mapper...")
     key_map = {"input": "text", "output": "generated_output"}
@@ -57,58 +48,63 @@ def main() -> None:
 
     # 4. Set up the Optimizer
     logging.info("Setting up the Optimizer...")
-    # optimizer = RandomSearchOptimizer(
-    #     generator=generator,
-    #     teacher_model="gemini/gemini-2.5-flash-lite",
-    #     num_variations=4,
-    # )
-    # results = optimizer.optimize(
-    #     evaluator=evaluator, data_mapper=data_mapper, dataset=dataset
-    # )
-    # optimizer = ProTeGi(
-    #     teacher_generator=LiteLLMGenerator(
-    #         "gemini/gemini-2.5-flash-lite", prompt_template=initial_prompt
-    #     )
-    # ))
-    optimizer = GEPAOptimizer(reflection_model="gpt-5")
-    # Define a simple dataset
+    optimizer = BayesianSearchOptimizer(
+        n_trials=3,
+        min_examples=1,
+        max_examples=3,
+        eval_subset_size=3,
+        eval_subset_strategy="random",
+        # Enable teacher-guided template inference
+        infer_example_template_via_teacher=True,
+        teacher_model_name="gpt-5",
+        teacher_model_kwargs={"temperature": 1.0, "max_tokens": 16000},
+        few_shot_title="Few-shot Examples:",
+    )
+    
+    # Define a dataset with placeholder stories for few-shot example construction
     dataset = [
         {
-            "text": "The sun is a star at the center of the Solar System. It is a nearly perfect sphere of hot plasma, with internal convective motion that generates a magnetic field via a dynamo process."
+            "text": "OpenAI introduced a new multimodal model with improved vision and audio. The model supports real-time tool use and lower latency.",
         },
         {
-            "text": "Python is an interpreted, high-level and general-purpose programming language. Python's design philosophy emphasizes code readability with its notable use of significant whitespace."
+            "text": "The ECB kept interest rates unchanged, citing persistent inflation concerns while forecasting moderate growth for the eurozone.",
         },
         {
-            "text": "The mitochondria is the powerhouse of the cell, responsible for generating most of the cell's supply of adenosine triphosphate (ATP), used as a source of chemical energy."
+            "text": "Apple unveiled new MacBook models featuring M-series chips, promising better battery life and enhanced AI workloads.",
         },
         {
-            "text": "The Roman Empire was the post-Republican period of ancient Rome. As a polity it included large territorial holdings around the Mediterranean Sea in Europe, Northern Africa, and Western Asia ruled by emperors."
+            "text": "Researchers discovered a room-temperature superconductor claim was flawed, after replication attempts failed and key data was questioned.",
         },
         {
-            "text": "Artificial intelligence (AI) is intelligence demonstrated by machines, unlike the natural intelligence displayed by humans and animals, which involves consciousness and emotionality."
+            "text": "A major airline announced a carbon-neutral plan by 2035, including sustainable aviation fuel investments and fleet upgrades.",
         },
         {
-            "text": "To Kill a Mockingbird is a novel by Harper Lee published in 1960. Instantly successful, widely read in high schools and middle schools in the United States, it has become a classic of modern American literature, winning the Pulitzer Prize."
+            "text": "NASA postponed the Artemis mission due to safety checks, targeting a new launch window pending further tests.",
         },
         {
-            "text": "Supply and demand is a microeconomic model of price determination in a market. It postulates that, holding all else equal, in a competitive market, the unit price for a particular good, or other traded item such as labor or liquid financial assets, will vary until it settles at a point where the quantity demanded will equal the quantity supplied."
+            "text": "A cybersecurity firm reported a critical vulnerability in a popular VPN provider; patches were released and users urged to update.",
         },
         {
-            "text": "Quantum mechanics is a fundamental theory in physics that provides a description of the physical properties of nature at the scale of atoms and subatomic particles. It is the foundation of all quantum physics including quantum chemistry, quantum field theory, quantum technology, and quantum information science."
+            "text": "The UN climate summit concluded with pledges to accelerate renewable energy deployment and phase down unabated coal.",
+        },
+        {
+            "text": "A biotech startup received FDA approval for a gene therapy targeting a rare inherited disorder, marking a clinical milestone.",
+        },
+        {
+            "text": "Developers launched a new open-source vector database with hybrid search, aiming at scalable RAG applications.",
         },
     ]
     logging.info(f"Using a dataset with {len(dataset)} examples.")
+
+    # Run optimization
+    logging.info("--- Starting Optimization Loop ---")
+    optimization_start_time = time.time()
     results = optimizer.optimize(
         evaluator=evaluator,
         data_mapper=data_mapper,
         dataset=dataset,
         initial_prompts=[initial_prompt],
-        max_metric_calls=20,
     )
-    # Run optimization
-    logging.info("--- Starting Optimization Loop ---")
-    optimization_start_time = time.time()
     optimization_end_time = time.time()
     logging.info(
         f"--- Optimization Loop Finished in {optimization_end_time - optimization_start_time:.2f} seconds ---"
