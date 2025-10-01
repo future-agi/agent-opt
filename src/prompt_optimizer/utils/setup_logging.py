@@ -26,6 +26,11 @@ def setup_logging(
         filemode (str): The mode to open the log file in ('w' for write, 'a' for append).
                         Defaults to 'a'.
     """
+    # Configure third-party loggers to be less verbose
+    third_party_loggers = ["LiteLLM", "openai", "httpcore"]
+    for logger_name in third_party_loggers:
+        logging.getLogger(logger_name).setLevel(logging.WARNING)
+
     logger = logging.getLogger(PACKAGE_LOGGER_NAME)
     logger.setLevel(level)
     logger.handlers.clear()

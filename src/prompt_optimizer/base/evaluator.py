@@ -2,15 +2,12 @@ import json
 import os
 from typing import List, Dict, Any, Union, Optional
 import logging
-
-from fi.evals import Evaluator as OnlineAIEvaluator
 from ..types import EvaluationResult
-# try:
-#     from fi.evals.metrics.base_metric import BaseMetric, BatchRunResult
-#     from fi.evals.metrics.llm_as_judges.base_llm_judge import BaseLLMJudgeMetric
-#     from fi.evals.llm.providers.litellm import LiteLLMProvider
-# except ImportError as e:
-#     logging.error("ai-evaluation library hasn't been updated")
+
+from fi.evals import Evaluator as FAGIEvaluator
+from fi.evals.metrics.base_metric import BaseMetric, BatchRunResult
+from fi.evals.metrics.base_llm_metric import BaseLLMJudgeMetric
+from fi.evals.llm.providers.litellm import LiteLLMProvider
 
 logger = logging.getLogger(__name__)
 
@@ -24,16 +21,14 @@ class Evaluator:
     def __init__(
         self,
         # Option 1: For local evaluation (Heuristics or LLM Judge)
-        # metric: Optional[Union[BaseMetric, BaseLLMJudgeMetric]] = None,
-        metric: Any = None,
-        # Option 2: For FutureAGI online evaluation
+        metric: Optional[Union[BaseMetric, BaseLLMJudgeMetric]] = None,
+        # Option 2: For FutureAGI evaluation
         eval_template: Optional[str] = None,
         eval_model_name: Optional[str] = None,
         fi_api_key: Optional[str] = None,
         fi_secret_key: Optional[str] = None,
         # Optional: For LLM-as-a-judge if a specific provider is needed
-        # provider: Optional[LiteLLMProvider] = None,
-        provider: Any = None,
+        provider: Optional[LiteLLMProvider] = None,
     ):
         """
         Initializes the unified evaluator.
@@ -49,15 +44,13 @@ class Evaluator:
             - Provide your `fi_api_key`.
         """
         self._strategy: str = ""
-        # self._metric_instance: Optional[BaseMetric] = None
-        self._metric_instance: Optional[Any] = None
-        self._online_client: Optional[OnlineAIEvaluator] = None
+        self._metric_instance: Optional[BaseMetric] = None
+        self._online_client: Optional[FAGIEvaluator] = None
         self._online_eval_template: Optional[str] = None
         self._online_model_name: Optional[str] = None
 
         if metric:
-            raise NotImplementedError()
-            # --- LOCAL EVALUATION PATH ---
+            # --- LOCAL EVALUATION ---
             if not isinstance(metric, BaseMetric):
                 raise TypeError(
                     "The 'metric' argument must be an instance of a class inheriting from BaseMetric."
@@ -74,8 +67,8 @@ class Evaluator:
             )
 
         elif eval_template and eval_model_name:
-            # --- ONLINE EVALUATION PATH (FutureAGI Platform) ---
-            self._strategy = "online"
+            # --- FAGI EVALUATION PATH (FutureAGI Platform) ---
+            self._strategy = "fagi"
             api_key = fi_api_key or os.getenv("FI_API_KEY")
             secret = fi_secret_key or os.getenv("FI_SECRET_KEY")
             if not api_key or not secret:
@@ -83,7 +76,7 @@ class Evaluator:
                     "To use the FutureAGI platform, you must provide an 'fi_api_key' and 'fi_secret_key' or set the FI_API_KEY and FI_SECRET_KEY environment variable."
                 )
 
-            self._online_client = OnlineAIEvaluator(fi_api_key=api_key)
+            self._online_client = FAGIEvaluator(fi_api_key=api_key)
             self._online_eval_template = eval_template
             self._online_model_name = eval_model_name
             logger.info(
@@ -109,30 +102,52 @@ class Evaluator:
         )
         if self._strategy == "local":
             return self._evaluate_local(inputs)
-        elif self._strategy == "online":
+        elif self._strategy == "fagi":
             return self._evaluate_online(inputs)
         else:
             # This should never be reached
             raise RuntimeError("Evaluator is not configured with a valid strategy.")
 
     def _evaluate_local(self, inputs: List[Dict[str, Any]]) -> List[EvaluationResult]:
-        raise NotImplementedError
         """Handles evaluation using local BaseMetric instances."""
         logger.info(
             "Running local evaluation with metric: %s",
             self._metric_instance.__class__.__name__,
         )
-        batch_result = self._metric_instance.evaluate(inputs)
+        try:
+            batch_result = self._metric_instance.evaluate(inputs)
+            results: List[EvaluationResult] = []
+            for i, (single_input, res) in enumerate(
+                zip(inputs, batch_result.eval_results)
+            ):
+                logger.debug(
+                    f"Evaluating input #{i + 1}: {json.dumps(single_input, indent=2, ensure_ascii=False)}"
+                )
+                if res and isinstance(res.output, (int, float)):
+                    score = max(0.0, min(1.0, float(res.output)))
+                    reason = res.reason or ""
+                    results.append(EvaluationResult(score=score, reason=reason))
+                    logger.info(
+                        f"Input #{i + 1} evaluated successfully. Score: {score:.4f}\nReason: {reason}"
+                    )
+                else:
+                    reason = "Local evaluation failed or returned invalid output."
+                    if res:
+                        reason = res.reason or reason
+                    results.append(EvaluationResult(score=0.0, reason=reason))
+                    logger.warning(
+                        "Input #%d evaluation failed. Reason: %s", i + 1, reason
+                    )
+        except Exception as e:
+            logger.error(f"Local evaluation failed for batch: {e}", exc_info=True)
+            # Return failing results for all inputs
+            results = [
+                EvaluationResult(score=0.0, reason=f"Local evaluation failed: {e}")
+                for _ in inputs
+            ]
 
-        scores: List[float] = []
-        for result in batch_result.eval_results:
-            if result and isinstance(result.output, (int, float)):
-                score = max(0.0, min(1.0, float(result.output)))
-                scores.append(score)
-            else:
-                scores.append(0.0)  # Append a failing score if the result is invalid
-        logger.info("Local evaluation completed. Returning %d scores.", len(scores))
-        return scores
+        logger.info("Local evaluation completed. Returning %d results.", len(results))
+        return results
 
     def _evaluate_online(self, inputs: List[Dict[str, Any]]) -> List[EvaluationResult]:
         """Handles evaluation using the FutureAGI platform."""

@@ -16,10 +16,10 @@ from ..generators.litellm import LiteLLMGenerator
 from ..types import IterationHistory, OptimizationResult
 
 MUTATE_PROMPT = """
-You are an expert in prompt engineering. Your task is to generate {num_variations} diverse variations of the following instruction by adaptively mixing in the provided thinking styles.
+You are an expert in prompt engineering. You will be given a task description and different styles known as meta prompts. Your task is to generate {num_variations} diverse variations of the following instruction by adaptively mixing meta prompt while keeping similar semantic meaning.
 
 [Task Description]: {task_description}
-[Thinking Styles]: {meta_prompts}
+[Meta Prompts]: {meta_prompts}
 [Prompt Instruction]: {prompt_instruction}
 
 Return ONLY a valid JSON object with a single key "variations" containing a list of the new prompt strings.
@@ -79,6 +79,10 @@ class PromptWizardOptimizer(BaseOptimizer):
         self.beam_size = beam_size
         self.thinking_styles = THINKING_STYLES
         logger.info("--- PromptWizard Optimizer Initialized ---")
+        logger.debug(
+            f"Initialized with: mutate_rounds={mutate_rounds}, "
+            f"refine_iterations={refine_iterations}, beam_size={beam_size}"
+        )
 
     def optimize(
         self,
@@ -86,16 +90,22 @@ class PromptWizardOptimizer(BaseOptimizer):
         data_mapper: BasicDataMapper,
         dataset: List[Dict[str, Any]],
         initial_prompts: List[str],
+        task_description: str = "No task description given.",
         **kwargs: Any,
     ) -> OptimizationResult:
-        task_description = kwargs.get("task_description", "No description provided.")
         eval_subset_size = kwargs.get("eval_subset_size", 25)
+        logger.info("--- Starting PromptWizard Optimization ---")
+        logger.debug(f"Task: {task_description}")
+        logger.debug(f"Initial prompts count: {len(initial_prompts)}")
+        logger.debug(f"Dataset size: {len(dataset)}")
+        logger.debug(f"Evaluation subset size: {eval_subset_size}")
 
         if not initial_prompts:
             raise ValueError("Initial prompts list cannot be empty.")
 
         current_best_instruction = initial_prompts[0]
         history: List[IterationHistory] = []
+        logger.info(f"Initial best instruction: '{current_best_instruction[:100]}...'")
 
         for i in range(self.refine_iterations):
             logger.info(
@@ -103,13 +113,18 @@ class PromptWizardOptimizer(BaseOptimizer):
             )
 
             # 1. Mutate
+            logger.info("Step 1: Mutating instruction...")
             mutated_prompts = self._mutate_instruction(
                 current_best_instruction, task_description
             )
             candidate_pool = {current_best_instruction, *mutated_prompts}
+            logger.info(f"Generated {len(mutated_prompts)} unique new prompts.")
+            logger.debug(f"Candidate pool size: {len(candidate_pool)}")
 
             # 2. Score
+            logger.info("Step 2: Scoring candidate prompts...")
             eval_subset = random.sample(dataset, min(len(dataset), eval_subset_size))
+            logger.debug(f"Scoring against a subset of {len(eval_subset)} examples.")
             iteration_history = self._score_candidates(
                 list(candidate_pool), evaluator, data_mapper, eval_subset
             )
@@ -121,20 +136,36 @@ class PromptWizardOptimizer(BaseOptimizer):
             top_prompts_this_round = [
                 item.prompt for item in sorted_by_score[: self.beam_size]
             ]
+            logger.info(f"Top {self.beam_size} prompts selected for refinement.")
+            for idx, p in enumerate(top_prompts_this_round):
+                score = sorted_by_score[idx].average_score
+                logger.debug(f"  - Prompt (Score: {score:.4f}): '{p[:100]}...'")
 
             # 3. Critique and Refine
+            logger.info("Step 3: Critiquing and refining top prompts...")
             refined_prompts = set()
             for prompt_to_refine in top_prompts_this_round:
                 errors = self._get_errors(
                     prompt_to_refine, evaluator, data_mapper, dataset
                 )
                 if errors:
+                    logger.debug(
+                        f"Found {len(errors)} errors for prompt: '{prompt_to_refine[:100]}...'"
+                    )
                     refined = self._critique_and_refine(prompt_to_refine, errors)
                     if refined:
+                        logger.debug(f"Successfully refined prompt.")
                         refined_prompts.add(refined)
+                else:
+                    logger.debug(
+                        f"No errors found for prompt, skipping refinement: '{prompt_to_refine[:100]}...'"
+                    )
 
             # Determine the best instruction for the next iteration
             if refined_prompts:
+                logger.info(
+                    f"Scoring {len(refined_prompts)} refined prompts to find new best."
+                )
                 final_candidates_this_round = {
                     current_best_instruction,
                     *refined_prompts,
@@ -150,17 +181,20 @@ class PromptWizardOptimizer(BaseOptimizer):
                     final_history, key=lambda x: x.average_score, reverse=True
                 )[0].prompt
             else:
+                logger.info("No prompts were refined, carrying over previous best.")
                 current_best_instruction = top_prompts_this_round[0]
 
             logger.info(
                 f"Best instruction after iteration {i + 1}: '{current_best_instruction[:100]}...'"
             )
 
+        logger.info("--- PromptWizard Optimization Finished ---")
         final_history = sorted(history, key=lambda x: x.average_score, reverse=True)
         best_prompt = final_history[0].prompt
         best_score = final_history[0].average_score
+        logger.info(f"Final best prompt (Score: {best_score:.4f}): '{best_prompt}'")
 
-        final_best_generator = LiteLLMGenerator("final-model", best_prompt)
+        final_best_generator = LiteLLMGenerator(self.teacher.model_name, best_prompt)
         return OptimizationResult(
             best_generator=final_best_generator,
             history=history,
@@ -168,28 +202,41 @@ class PromptWizardOptimizer(BaseOptimizer):
         )
 
     def _mutate_instruction(
-        self, base_instruction: str, task_description: str
+        self,
+        base_instruction: str,
+        task_description: str,
     ) -> Set[str]:
+        logger.debug(
+            f"Entering mutation phase for instruction: '{base_instruction[:100]}...'"
+        )
         all_variations = set()
-        for _ in range(self.mutate_rounds):
+        temp_generator = LiteLLMGenerator("gpt-5-mini", "{prompt}")
+        for i in range(self.mutate_rounds):
+            logger.debug(f"Mutation round {i + 1}/{self.mutate_rounds}")
             prompt = MUTATE_PROMPT.format(
                 num_variations=len(self.thinking_styles),
                 task_description=task_description,
                 meta_prompts="\n".join(self.thinking_styles),
                 prompt_instruction=base_instruction,
             )
-            response_text = self.teacher.generate(
+            response_text = temp_generator.generate(
                 {"prompt": prompt}, response_format={"type": "json_object"}
             )
             variations = self._parse_variations_from_json(response_text)
+            logger.debug(f"Generated {len(variations)} variations in this round.")
             all_variations.update(variations)
+        logger.debug(f"Total unique variations from mutation: {len(all_variations)}")
         return all_variations
 
     def _critique_and_refine(
-        self, prompt: str, errors: List[Dict[str, Any]]
+        self,
+        prompt: str,
+        errors: List[Dict[str, Any]],
     ) -> str | None:
+        logger.debug(f"Entering critique and refine for: '{prompt[:100]}...'")
         error_str = json.dumps(errors, indent=2, ensure_ascii=False)
 
+        logger.debug("Generating critique...")
         critique_prompt = CRITIQUE_PROMPT.format(instruction=prompt, examples=error_str)
         critique_response = self.teacher.generate(
             {"prompt": critique_prompt}, response_format={"type": "json_object"}
@@ -198,8 +245,10 @@ class PromptWizardOptimizer(BaseOptimizer):
         if not critiques:
             logger.warning("Critique generation failed, skipping refinement.")
             return None
-        critique_text = critiques[0]  # Expecting a single critique string in the list
+        critique_text = "\n".join([critique for critique in critiques])
+        logger.debug(f"Generated critique: '{critique_text[:100]}...'")
 
+        logger.debug("Refining prompt based on critique...")
         refine_prompt = REFINE_PROMPT.format(
             instruction=prompt,
             examples=error_str,
@@ -211,7 +260,12 @@ class PromptWizardOptimizer(BaseOptimizer):
         )
 
         refined_prompts = self._parse_variations_from_json(refined_text)
-        return refined_prompts[0] if refined_prompts else None
+        if refined_prompts:
+            logger.debug(f"Refined prompt: '{refined_prompts[0][:100]}...'")
+            return refined_prompts[0]
+        else:
+            logger.warning("Refinement step produced no new prompts.")
+            return None
 
     # Helper methods (shared with ProTeGi, kept here for encapsulation)
     def _get_errors(
@@ -222,6 +276,7 @@ class PromptWizardOptimizer(BaseOptimizer):
         dataset: List[Dict[str, Any]],
         sample_size: int = 10,
     ) -> List[Dict[str, Any]]:
+        logger.debug(f"Getting errors for prompt: '{prompt[:100]}...'")
         subset = random.sample(dataset, min(len(dataset), sample_size))
         temp_generator = LiteLLMGenerator("gpt-4o-mini", prompt)
         generated_outputs = [temp_generator.generate(example) for example in subset]
@@ -230,11 +285,13 @@ class PromptWizardOptimizer(BaseOptimizer):
             for gen_out, ex in zip(generated_outputs, subset)
         ]
         results = evaluator.evaluate(eval_inputs)
-        return [
+        errors = [
             {"inputs": subset[i], "output": generated_outputs[i], "score": res.score}
             for i, res in enumerate(results)
             if res.score < 0.5
         ]
+        logger.debug(f"Found {len(errors)} examples with score < 0.5.")
+        return errors
 
     def _score_candidates(
         self,
@@ -243,8 +300,9 @@ class PromptWizardOptimizer(BaseOptimizer):
         data_mapper: BasicDataMapper,
         dataset: List[Dict[str, Any]],
     ) -> List[IterationHistory]:
+        logger.debug(f"Scoring {len(prompts)} candidate prompts.")
         histories = []
-        for prompt in prompts:
+        for i, prompt in enumerate(prompts):
             temp_generator = LiteLLMGenerator("gpt-4o-mini", prompt)
             generated_outputs = [
                 temp_generator.generate(example) for example in dataset
@@ -257,6 +315,9 @@ class PromptWizardOptimizer(BaseOptimizer):
             avg_score = (
                 sum(res.score for res in results) / len(results) if results else 0.0
             )
+            logger.debug(
+                f"  - Scored prompt {i + 1}/{len(prompts)} (Avg Score: {avg_score:.4f}): '{prompt[:100]}...'"
+            )
             histories.append(
                 IterationHistory(
                     prompt=prompt, average_score=avg_score, individual_results=results
@@ -266,19 +327,46 @@ class PromptWizardOptimizer(BaseOptimizer):
 
     @staticmethod
     def _parse_variations_from_json(text: str) -> List[str]:
-        """Parses a JSON string containing a 'variations' key."""
+        text = text.strip()
+
+        # --- Stage 1: Try to parse the entire string as JSON ---
         try:
-            match = re.search(r"\{.*\}", text, re.DOTALL)
-            if not match:
-                logger.warning(f"Could not find any JSON in the teacher's response.")
-                return []
-            json_str = match.group(0)
-            data = json.loads(json_str)
+            data = json.loads(text)
             return Variations.model_validate(data).variations
+        except (json.JSONDecodeError, ValidationError):
+            # This is expected if there's extra text, so we continue.
+            pass
+
+        # --- Stage 2: Look for a JSON markdown code block ---
+        try:
+            match = re.search(r"```json\s*(\{.*?\})\s*```", text, re.DOTALL)
+            if match:
+                json_str = match.group(1)
+                data = json.loads(json_str)
+                return Variations.model_validate(data).variations
+        except (json.JSONDecodeError, ValidationError):
+            pass
+
+        # --- Stage 3: Greedy fallback to find the first '{' and last '}' ---
+        try:
+            start_index = text.find("{")
+            end_index = text.rfind("}")
+            if start_index != -1 and end_index != -1 and end_index > start_index:
+                json_str = text[start_index : end_index + 1]
+                data = json.loads(json_str)
+                return Variations.model_validate(data).variations
         except (json.JSONDecodeError, ValidationError) as e:
-            logger.error(f"Failed to parse teacher model JSON response: {e}")
-            logger.debug(f"Raw problematic output:\n{text}")
+            # If all parsing attempts fail, log the error and return empty.
+            logging.error(
+                f"Failed to parse teacher model JSON response after all fallbacks: {e}"
+            )
+            logging.debug(f"Raw problematic output that failed parsing:\n{text}")
             return []
+
+        # If no JSON object is found at all
+        logging.warning("Could not find any JSON in the teacher's response.")
+        logging.debug(f"Raw response with no JSON:\n{text}")
+        return []
 
 
 # Static list of thinking styles from PromptWizard's config

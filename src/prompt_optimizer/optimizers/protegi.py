@@ -310,15 +310,43 @@ class ProTeGi(BaseOptimizer):
 
     @staticmethod
     def _parse_variations_from_json(text: str) -> List[str]:
+        text = text.strip()
+
+        # --- Stage 1: Try to parse the entire string as JSON ---
         try:
-            match = re.search(r"\{.*\}", text, re.DOTALL)
-            if not match:
-                logging.warning(f"Could not find any JSON in the teacher's response.")
-                return []
-            json_str = match.group(0)
-            data = json.loads(json_str)
+            data = json.loads(text)
             return GradientVariations.model_validate(data).variations
+        except (json.JSONDecodeError, ValidationError):
+            # This is expected if there's extra text, so we continue.
+            pass
+
+        # --- Stage 2: Look for a JSON markdown code block ---
+        try:
+            match = re.search(r"```json\s*(\{.*?\})\s*```", text, re.DOTALL)
+            if match:
+                json_str = match.group(1)
+                data = json.loads(json_str)
+                return GradientVariations.model_validate(data).variations
+        except (json.JSONDecodeError, ValidationError):
+            pass
+
+        # --- Stage 3: Greedy fallback to find the first '{' and last '}' ---
+        try:
+            start_index = text.find("{")
+            end_index = text.rfind("}")
+            if start_index != -1 and end_index != -1 and end_index > start_index:
+                json_str = text[start_index : end_index + 1]
+                data = json.loads(json_str)
+                return GradientVariations.model_validate(data).variations
         except (json.JSONDecodeError, ValidationError) as e:
-            logging.error(f"Failed to parse teacher model JSON response: {e}")
-            logging.debug(f"Raw problematic output:\n{text}")
+            # If all parsing attempts fail, log the error and return empty.
+            logging.error(
+                f"Failed to parse teacher model JSON response after all fallbacks: {e}"
+            )
+            logging.debug(f"Raw problematic output that failed parsing:\n{text}")
             return []
+
+        # If no JSON object is found at all
+        logging.warning("Could not find any JSON in the teacher's response.")
+        logging.debug(f"Raw response with no JSON:\n{text}")
+        return []
