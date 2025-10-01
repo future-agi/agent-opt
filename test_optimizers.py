@@ -22,6 +22,7 @@ from prompt_optimizer.optimizers import (
     MetaPromptOptimizer,
     GEPAOptimizer,
 )
+from prompt_optimizer import setup_logging
 
 # ==============================================================================
 # Configuration
@@ -29,9 +30,7 @@ from prompt_optimizer.optimizers import (
 
 # --- Dataset Configuration ---
 DATASET_FILE = "experiments/datasets/d2.csv"
-DATASET_SAMPLE_SIZE = (
-    20  # Use a smaller, consistent subset for a fair and fast bake-off
-)
+DATASET_SAMPLE_SIZE = 2
 
 # --- Optimization Configuration ---
 INITIAL_PROMPT = "Given the context:{context}, answer the question: {question}"
@@ -49,33 +48,34 @@ EVALUATOR_MODEL = "turing_flash"  # A fast, cheap model for the online evaluator
 # ==============================================================================
 # Main Script Logic
 # ==============================================================================
+logger = logging.getLogger("testing_script")
 
 
 def load_dataset(file_path: str, sample_size: int) -> List[Dict[str, Any]]:
     """Loads a dataset from a CSV file and returns a random sample."""
-    logging.info(f"Loading dataset from {file_path}...")
+    logger.info(f"Loading dataset from {file_path}...")
     try:
-        df = pd.read_csv(file_path)
+        df = pd.read_csv(file_path, encoding="utf-8")
         df.dropna(subset=["context", "question", "answer"], inplace=True)
         # Convert to a flat dictionary structure
         full_dataset = df.to_dict("records")
 
         if not full_dataset:
-            logging.error(
+            logger.error(
                 "Dataset is empty after processing. Please check the CSV file."
             )
             return []
 
         if len(full_dataset) < sample_size:
-            logging.warning(f"Dataset has {len(full_dataset)} rows, using all of them.")
+            logger.warning(f"Dataset has {len(full_dataset)} rows, using all of them.")
             return full_dataset
 
         return random.sample(full_dataset, sample_size)
     except FileNotFoundError:
-        logging.error(f"Dataset file not found at: {file_path}")
+        logger.error(f"Dataset file not found at: {file_path}")
         return []
     except Exception as e:
-        logging.error(f"Error loading or processing dataset: {e}")
+        logger.error(f"Error loading or processing dataset: {e}")
         return []
 
 
@@ -93,12 +93,10 @@ def print_summary(optimizer_name: str, result: OptimizationResult, duration: flo
 def main() -> None:
     """Main function to run the optimizer bake-off."""
     load_dotenv()
-    logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-    )
+    setup_logging(logging.INFO, log_to_file=True, log_file="test_optim.log")
 
     if not os.getenv("OPENAI_API_KEY") or not os.getenv("FI_API_KEY"):
-        logging.error("API keys not found in .env file.")
+        logger.error("API keys not found in .env file.")
         return
 
     # --- 1. Load Data and Set Up Common Components ---
@@ -106,7 +104,7 @@ def main() -> None:
     if not dataset:
         return
 
-    logging.info("Setting up common components (Evaluator and Data Mapper)...")
+    logger.info("Setting up common components (Evaluator and Data Mapper)...")
 
     # The 'context_adherence' evaluator expects keys 'output' and 'context'.
     # We will map our generated text to 'output' and the original context to 'context'.
@@ -144,7 +142,7 @@ def main() -> None:
     # --- 3. Run Each Optimizer on the SAME Dataset ---
     for name, optimizer in optimizers_to_test.items():
         try:
-            logging.info(f"\n--- Running Optimizer: {name} ---")
+            logger.info(f"\n--- Running Optimizer: {name} ---")
             start_time = time.time()
 
             # Call optimize with a consistent signature
@@ -160,9 +158,7 @@ def main() -> None:
             all_results[name] = (results, duration)
             print_summary(name, results, duration)
         except Exception as e:
-            logging.error(
-                f"Optimizer '{name}' failed with an error: {e}", exc_info=True
-            )
+            logger.error(f"Optimizer '{name}' failed with an error: {e}", exc_info=True)
 
     # --- 4. Final Summary ---
     print("\n\n" + "#" * 80)

@@ -1,3 +1,4 @@
+import json
 import os
 from typing import List, Dict, Any, Union, Optional
 import logging
@@ -11,10 +12,7 @@ from ..types import EvaluationResult
 # except ImportError as e:
 #     logging.error("ai-evaluation library hasn't been updated")
 
-
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logger = logging.getLogger(__name__)
 
 
 class Evaluator:
@@ -71,6 +69,9 @@ class Evaluator:
 
             self._strategy = "local"
             self._metric_instance = metric
+            logger.info(
+                "Initialized Evaluator with local metric: %s", metric.__class__.__name__
+            )
 
         elif eval_template and eval_model_name:
             # --- ONLINE EVALUATION PATH (FutureAGI Platform) ---
@@ -85,6 +86,11 @@ class Evaluator:
             self._online_client = OnlineAIEvaluator(fi_api_key=api_key)
             self._online_eval_template = eval_template
             self._online_model_name = eval_model_name
+            logger.info(
+                "Initialized Evaluator for online evaluation with template '%s' and model '%s'.",
+                eval_template,
+                eval_model_name,
+            )
 
         else:
             raise ValueError(
@@ -96,6 +102,11 @@ class Evaluator:
         """
         Runs a batch evaluation using the configured strategy.
         """
+        logger.info(
+            "Starting evaluation for %d inputs using '%s' strategy.",
+            len(inputs),
+            self._strategy,
+        )
         if self._strategy == "local":
             return self._evaluate_local(inputs)
         elif self._strategy == "online":
@@ -107,6 +118,10 @@ class Evaluator:
     def _evaluate_local(self, inputs: List[Dict[str, Any]]) -> List[EvaluationResult]:
         raise NotImplementedError
         """Handles evaluation using local BaseMetric instances."""
+        logger.info(
+            "Running local evaluation with metric: %s",
+            self._metric_instance.__class__.__name__,
+        )
         batch_result = self._metric_instance.evaluate(inputs)
 
         scores: List[float] = []
@@ -116,15 +131,18 @@ class Evaluator:
                 scores.append(score)
             else:
                 scores.append(0.0)  # Append a failing score if the result is invalid
-
+        logger.info("Local evaluation completed. Returning %d scores.", len(scores))
         return scores
 
     def _evaluate_online(self, inputs: List[Dict[str, Any]]) -> List[EvaluationResult]:
         """Handles evaluation using the FutureAGI platform."""
         results: List[EvaluationResult] = []
         # for some reason the online evaluator takes single input and not a list of inputs.
-        for single_input in inputs:
+        for i, single_input in enumerate(inputs):
             try:
+                logger.debug(
+                    f"Evaluating input #{i + 1}: {json.dumps(single_input, indent=2, ensure_ascii=False)}"
+                )
                 batch_result = self._online_client.evaluate(
                     eval_templates=self._online_eval_template,
                     inputs=single_input,
@@ -140,13 +158,22 @@ class Evaluator:
                     results.append(
                         EvaluationResult(score=score, reason=eval_res.reason or "")
                     )
+                    logger.info(
+                        f"Input #{i + 1} evaluated successfully. Score: {score:.4f}\nReason: {eval_res.reason}"
+                    )
+
                 else:
                     reason = "Online evaluation failed or returned invalid output."
                     if eval_res:
                         reason = eval_res.reason or reason
                     results.append(EvaluationResult(score=0.0, reason=reason))
+                    logger.warning(
+                        "Input #%d evaluation failed. Reason: %s", i + 1, reason
+                    )
             except Exception as e:
+                logger.error(f"API call failed for input #{i + 1}: {e}", exc_info=True)
                 results.append(
                     EvaluationResult(score=0.0, reason=f"API call failed: {e}")
                 )
+        logger.info("Online evaluation completed. Returning %d results.", len(results))
         return results

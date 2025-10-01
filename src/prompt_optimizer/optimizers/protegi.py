@@ -251,7 +251,7 @@ class ProTeGi(BaseOptimizer):
         error_sample = random.sample(errors, min(len(errors), self.errors_per_gradient))
         critique_prompt = GET_GRADIENTS_PROMPT.format(
             prompt=prompt,
-            error_examples=json.dumps(error_sample, indent=2),
+            error_examples=json.dumps(error_sample, indent=2, ensure_ascii=False),
             num_feedbacks=self.num_gradients,
         )
         response_text = self.teacher.generate(
@@ -266,7 +266,7 @@ class ProTeGi(BaseOptimizer):
         error_sample = random.sample(errors, min(len(errors), self.errors_per_gradient))
         rewrite_prompt = APPLY_GRADIENT_PROMPT.format(
             prompt=prompt,
-            error_examples=json.dumps(error_sample, indent=2),
+            error_examples=json.dumps(error_sample, indent=2, ensure_ascii=False),
             feedback=feedback,
             num_new_prompts=self.prompts_per_gradient,
         )

@@ -1,5 +1,4 @@
 import json
-import logging
 import random
 from typing import Any, Dict, List, Optional, Set
 
@@ -11,12 +10,14 @@ from ..datamappers.basic_mapper import BasicDataMapper
 from ..base.evaluator import Evaluator
 from ..generators.litellm import LiteLLMGenerator
 from ..types import IterationHistory, OptimizationResult
+import logging
 
+logger = logging.getLogger(__name__)
 # ==============================================================================
 # Prompts and Pydantic Models for the Teacher LLM (Meta-Model)
 # ==============================================================================
 
-# This is a direct adaptation of promptim's excellent meta-prompt.
+
 META_PROMPT_TEMPLATE = """
 You are a world-class expert in prompt engineering. Your task is to diagnose and optimize a given prompt based on its performance on a set of test cases.
 
@@ -89,7 +90,7 @@ class MetaPromptOptimizer(BaseOptimizer):
         num_rounds: Optional[int] = 5,
         eval_subset_size: Optional[int] = 40,
     ) -> OptimizationResult:
-        logging.info("--- Starting Meta-Prompt Optimization ---")
+        logger.info("--- Starting Meta-Prompt Optimization ---")
 
         if not initial_prompts:
             raise ValueError("Initial prompts list cannot be empty.")
@@ -101,10 +102,10 @@ class MetaPromptOptimizer(BaseOptimizer):
         previous_attempts = set()
 
         for round_num in range(num_rounds):
-            logging.info(
+            logger.info(
                 f"\n--- Starting Optimization Round {round_num + 1}/{num_rounds} ---"
             )
-            logging.info(f"Current best prompt:\n{current_prompt}")
+            logger.info(f"Current best prompt:\n{current_prompt}")
 
             # 1. Evaluate the current prompt on a subset of data
             eval_subset = random.sample(dataset, min(len(dataset), eval_subset_size))
@@ -113,7 +114,7 @@ class MetaPromptOptimizer(BaseOptimizer):
             )
 
             if not iteration_history:
-                logging.warning("Evaluation of current prompt failed. Skipping round.")
+                logger.warning("Evaluation of current prompt failed. Skipping round.")
                 continue
 
             history.append(iteration_history)
@@ -122,7 +123,7 @@ class MetaPromptOptimizer(BaseOptimizer):
             if current_score > best_score:
                 best_score = current_score
                 best_prompt = current_prompt
-                logging.info(f"New best score found: {best_score:.4f}")
+                logger.info(f"New best score found: {best_score:.4f}")
 
             # 2. Use the teacher model to generate a new, improved prompt
             annotated_results_str = self._format_results(iteration_history, eval_subset)
@@ -139,7 +140,7 @@ class MetaPromptOptimizer(BaseOptimizer):
                 task_description=task_description,
             )
 
-            logging.debug("Generating new prompt with meta-prompt...")
+            logger.debug("Generating new prompt with meta-prompt...")
             new_prompt_json = self.teacher.generate(
                 prompt_vars={"prompt": meta_prompt},
                 response_format={"type": "json_object"},
@@ -147,11 +148,11 @@ class MetaPromptOptimizer(BaseOptimizer):
 
             try:
                 parsed_output = MetaPromptOutput.model_validate_json(new_prompt_json)
-                logging.info(f"Teacher's Hypothesis: {parsed_output.hypothesis}")
+                logger.info(f"Teacher's Hypothesis: {parsed_output.hypothesis}")
                 previous_attempts.add(current_prompt)
                 current_prompt = parsed_output.improved_prompt
             except (ValidationError, json.JSONDecodeError) as e:
-                logging.error(
+                logger.error(
                     f"Failed to parse new prompt from teacher model, keeping current prompt. Error: {e}"
                 )
 
@@ -187,7 +188,7 @@ class MetaPromptOptimizer(BaseOptimizer):
                 prompt=prompt, average_score=avg_score, individual_results=results
             )
         except Exception as e:
-            logging.error(f"Failed to score prompt: {e}")
+            logger.error(f"Failed to score prompt: {e}")
             return None
 
     def _format_results(
@@ -198,7 +199,9 @@ class MetaPromptOptimizer(BaseOptimizer):
         for i, result in enumerate(iteration_history.individual_results):
             example_input = dataset[i]
             formatted_lines.append(f"Example {i + 1}:")
-            formatted_lines.append(f"  Input: {json.dumps(example_input)}")
+            formatted_lines.append(
+                f"  Input: {json.dumps(example_input, ensure_ascii=False)}"
+            )
             formatted_lines.append(f"  Score: {result.score:.2f}")
             formatted_lines.append(f"  Reason: {result.reason}")
             formatted_lines.append("---")
