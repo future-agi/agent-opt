@@ -52,8 +52,6 @@ class RandomSearchOptimizer(BaseOptimizer):
         self.generator = generator
         self.teacher_model = teacher_model
         self.num_variations = num_variations
-        self.eval_template = eval_template
-        self.eval_model_name = eval_model_name
 
         if teacher_model_kwargs is None and "gpt" in teacher_model:
             self.teacher_model_kwargs = {"temperature": 1.0, "max_tokens": 16000}

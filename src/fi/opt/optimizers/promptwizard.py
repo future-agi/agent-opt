@@ -68,7 +68,7 @@ class PromptWizardOptimizer(BaseOptimizer):
 
     def __init__(
         self,
-        teacher_generator: BaseGenerator,
+        teacher_generator: LiteLLMGenerator,
         mutate_rounds: int = 3,
         refine_iterations: int = 2,
         beam_size: int = 1,

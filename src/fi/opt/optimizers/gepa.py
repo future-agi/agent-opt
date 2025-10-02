@@ -32,9 +32,7 @@ class _InternalGEPAAdapter(GEPAAdapter[DataInst, Dict[str, Any], Dict[str, Any]]
         self.generator_model = generator_model
         self.evaluator = evaluator
         self.data_mapper = data_mapper
-        logger.info(
-            f"[_InternalGEPAAdapter] Initialized with generator_model: {generator_model}"
-        )
+        logger.info(f"Initialized with generator_model: {generator_model}")
 
     def evaluate(
         self,
@@ -47,45 +45,41 @@ class _InternalGEPAAdapter(GEPAAdapter[DataInst, Dict[str, Any], Dict[str, Any]]
         our framework's components to perform the evaluation.
         """
         eval_start_time = time.time()
-        logger.info(
-            f"[_InternalGEPAAdapter] Starting evaluation for a candidate prompt."
-        )
+        logger.info(f"Starting evaluation for a candidate prompt.")
 
         # GEPA provides the prompt as the first (and only) value in the candidate dict.
         prompt_text = next(iter(candidate.values()))
-        logger.info(
-            f"[_InternalGEPAAdapter] Evaluating prompt: '{prompt_text[:100]}...'"
-        )
-        logger.info(f"[_InternalGEPAAdapter] Batch size: {len(batch)}")
+        logger.info(f"Evaluating prompt: '{prompt_text[:100]}...'")
+        logger.info(f"Batch size: {len(batch)}")
 
         temp_generator = LiteLLMGenerator(
             model=self.generator_model, prompt_template=prompt_text
         )
 
-        logger.info(f"[_InternalGEPAAdapter] Generating outputs...")
+        logger.info(f"Generating outputs...")
         gen_start_time = time.time()
         generated_outputs = [temp_generator.generate(example) for example in batch]
         gen_end_time = time.time()
         logger.info(
-            f"[_InternalGEPAAdapter] Output generation finished in {gen_end_time - gen_start_time:.2f}s."
+            f"Output generation finished in {gen_end_time - gen_start_time:.2f}s."
         )
 
-        logger.info(f"[_InternalGEPAAdapter] Mapping evaluation inputs...")
+        logger.info(f"Mapping evaluation inputs...")
         eval_inputs = [
             self.data_mapper.map(gen_out, ex)
             for gen_out, ex in zip(generated_outputs, batch)
         ]
 
-        logger.info(f"[_InternalGEPAAdapter] Evaluating generated outputs...")
+        logger.info(f"Evaluating generated outputs...")
         evaluator_start_time = time.time()
         results = self.evaluator.evaluate(eval_inputs)
         evaluator_end_time = time.time()
         logger.info(
-            f"[_InternalGEPAAdapter] Evaluation with framework evaluator finished in {evaluator_end_time - evaluator_start_time:.2f}s."
+            f"Evaluation with framework evaluator finished in {evaluator_end_time - evaluator_start_time:.2f}s."
         )
 
         scores = [res.score for res in results]
-        logger.info(f"[_InternalGEPAAdapter] Scores: {scores}")
+        logger.info(f"Scores: {scores}")
         outputs = [
             {"generated_text": out, "full_result": res.model_dump()}
             for out, res in zip(generated_outputs, results)
@@ -93,7 +87,7 @@ class _InternalGEPAAdapter(GEPAAdapter[DataInst, Dict[str, Any], Dict[str, Any]]
 
         trajectories = []
         if capture_traces:
-            logger.info(f"[_InternalGEPAAdapter] Capturing traces.")
+            logger.info(f"Capturing traces.")
             for i in range(len(batch)):
                 trajectories.append(
                     {
@@ -104,9 +98,7 @@ class _InternalGEPAAdapter(GEPAAdapter[DataInst, Dict[str, Any], Dict[str, Any]]
                 )
 
         eval_end_time = time.time()
-        logger.info(
-            f"[_InternalGEPAAdapter] Evaluation finished in {eval_end_time - eval_start_time:.2f}s."
-        )
+        logger.info(f"Evaluation finished in {eval_end_time - eval_start_time:.2f}s.")
         return EvaluationBatch(
             outputs=outputs, scores=scores, trajectories=trajectories
         )
@@ -120,18 +112,14 @@ class _InternalGEPAAdapter(GEPAAdapter[DataInst, Dict[str, Any], Dict[str, Any]]
         """
         Creates the dataset for GEPA's reflective LLM to analyze.
         """
-        logger.info(f"[_InternalGEPAAdapter] Creating reflective dataset.")
+        logger.info(f"Creating reflective dataset.")
         reflective_data = {comp: [] for comp in components_to_update}
 
         if not eval_batch.trajectories:
-            logger.warning(
-                "[_InternalGEPAAdapter] No trajectories found to create reflective dataset."
-            )
+            logger.warning("No trajectories found to create reflective dataset.")
             return reflective_data
 
-        logger.info(
-            f"[_InternalGEPAAdapter] Processing {len(eval_batch.trajectories)} trajectories."
-        )
+        logger.info(f"Processing {len(eval_batch.trajectories)} trajectories.")
         for trajectory in eval_batch.trajectories:
             result = trajectory.get("evaluation_result", {})
             score = result.get("score", 0.0)
@@ -152,14 +140,9 @@ class _InternalGEPAAdapter(GEPAAdapter[DataInst, Dict[str, Any], Dict[str, Any]]
                 reflective_data[comp].append(example)
 
         logger.info(
-            f"[_InternalGEPAAdapter] Reflective dataset created for components: {components_to_update}"
+            f"Reflective dataset created for components: {components_to_update}"
         )
         return reflective_data
-
-
-# ==============================================================================
-# The User-Facing GEPA Optimizer Wrapper
-# ==============================================================================
 
 
 class GEPAOptimizer(BaseOptimizer):
@@ -181,7 +164,7 @@ class GEPAOptimizer(BaseOptimizer):
         self.reflection_model = reflection_model
         self.generator_model = generator_model
         logger.info(
-            f"[GEPAOptimizer] Initialized with reflection_model: {reflection_model}, generator_model: {generator_model}"
+            f"Initialized with reflection_model: {reflection_model}, generator_model: {generator_model}"
         )
 
     def optimize(
@@ -190,19 +173,19 @@ class GEPAOptimizer(BaseOptimizer):
         data_mapper: BasicDataMapper,
         dataset: List[Dict[str, Any]],
         initial_prompts: List[str],
-        max_metric_calls: Optional[int] = 50,
+        max_metric_calls: Optional[int] = 150,
     ) -> OptimizationResult:
         opt_start_time = time.time()
         logger.info("--- Starting GEPA Prompt Optimization ---")
-        logger.info(f"[GEPAOptimizer] Dataset size: {len(dataset)}")
-        logger.info(f"[GEPAOptimizer] Initial prompts: {initial_prompts}")
-        logger.info(f"[GEPAOptimizer] Max metric calls: {max_metric_calls}")
+        logger.info(f"Dataset size: {len(dataset)}")
+        logger.info(f"Initial prompts: {initial_prompts}")
+        logger.info(f"Max metric calls: {max_metric_calls}")
 
         if not initial_prompts:
             raise ValueError("Initial prompts list cannot be empty for GEPAOptimizer.")
 
         # 1. Create the internal adapter that bridges our framework to GEPA
-        logger.info("[GEPAOptimizer] Creating internal GEPA adapter...")
+        logger.info("Creating internal GEPA adapter...")
         adapter = _InternalGEPAAdapter(
             generator_model=self.generator_model,
             evaluator=evaluator,
@@ -211,10 +194,10 @@ class GEPAOptimizer(BaseOptimizer):
 
         # 2. Prepare the inputs for gepa.optimize
         seed_candidate = {"prompt": initial_prompts[0]}
-        logger.info(f"[GEPAOptimizer] Seed candidate for GEPA: {seed_candidate}")
+        logger.info(f"Seed candidate for GEPA: {seed_candidate}")
 
         # 3. Call the external GEPA library's optimize function
-        logger.info("[GEPAOptimizer] Calling gepa.optimize...")
+        logger.info("Calling gepa.optimize...")
         gepa_start_time = time.time()
         gepa_result = gepa.optimize(
             seed_candidate=seed_candidate,
@@ -227,17 +210,15 @@ class GEPAOptimizer(BaseOptimizer):
         )
         gepa_end_time = time.time()
         logger.info(
-            f"[GEPAOptimizer] gepa.optimize finished in {gepa_end_time - gepa_start_time:.2f}s."
+            f"gepa.optimize finished in {gepa_end_time - gepa_start_time:.2f}s."
         )
         logger.info(
-            f"[GEPAOptimizer] GEPA result best score: {gepa_result.val_aggregate_scores[gepa_result.best_idx]}"
+            f"GEPA result best score: {gepa_result.val_aggregate_scores[gepa_result.best_idx]}"
         )
-        logger.info(
-            f"[GEPAOptimizer] GEPA best candidate: {gepa_result.best_candidate}"
-        )
+        logger.info(f"GEPA best candidate: {gepa_result.best_candidate}")
 
         # 4. Translate GEPA's result back into our framework's standard format
-        logger.info("[GEPAOptimizer] Translating GEPA result to OptimizationResult...")
+        logger.info("Translating GEPA result to OptimizationResult...")
         history = [
             IterationHistory(
                 prompt=cand.get("prompt", ""),

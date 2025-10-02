@@ -2,10 +2,10 @@ import json
 import unittest
 from unittest.mock import MagicMock, patch
 
-from prompt_optimizer.optimizers.bayesian_search import BayesianSearchOptimizer
-from prompt_optimizer.datamappers import BasicDataMapper
-from prompt_optimizer.base.evaluator import Evaluator
-from prompt_optimizer.types import EvaluationResult
+from fi.opt.optimizers.bayesian_search import BayesianSearchOptimizer
+from fi.opt.datamappers import BasicDataMapper
+from fi.opt.base.evaluator import Evaluator
+from fi.types import EvaluationResult
 
 
 class DummyEvaluator(Evaluator):
@@ -28,7 +28,9 @@ class TestBayesianSearchOptimizer(unittest.TestCase):
         self.dataset = [
             {"prompt": f"p{i}", "story": f"s{i}", "label": i} for i in range(10)
         ]
-        self.data_mapper = BasicDataMapper({"input": "prompt", "output": "generated_output"})
+        self.data_mapper = BasicDataMapper(
+            {"input": "prompt", "output": "generated_output"}
+        )
         self.evaluator = DummyEvaluator()
 
     @patch("prompt_optimizer.generators.litellm.LiteLLMGenerator.generate")
@@ -70,7 +72,9 @@ class TestBayesianSearchOptimizer(unittest.TestCase):
 
     @patch("prompt_optimizer.generators.litellm.LiteLLMGenerator.generate")
     def test_teacher_infer_template(self, mock_generate):
-        mock_generate.return_value = json.dumps({"example_template": "Q: {prompt} -> {story}"})
+        mock_generate.return_value = json.dumps(
+            {"example_template": "Q: {prompt} -> {story}"}
+        )
         opt = BayesianSearchOptimizer(
             infer_example_template_via_teacher=True,
             template_infer_n_samples=5,
@@ -93,5 +97,3 @@ class TestBayesianSearchOptimizer(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-

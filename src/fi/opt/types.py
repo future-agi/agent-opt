@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field
 from typing import Any, List, Dict, Optional
-from .base.base_generator import BaseGenerator
 
 
 class LLMMessage(BaseModel):

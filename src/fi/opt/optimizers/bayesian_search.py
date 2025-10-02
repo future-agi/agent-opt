@@ -123,8 +123,14 @@ class BayesianSearchOptimizer(BaseOptimizer):
         self.infer_example_template_via_teacher = infer_example_template_via_teacher
         self.teacher_model_name = teacher_model_name
         # default kwargs for gpt-5 style models
-        default_teacher_kwargs: Dict[str, Any] = {"temperature": 1.0, "max_tokens": 16000}
-        self.teacher_model_kwargs = {**default_teacher_kwargs, **(teacher_model_kwargs or {})}
+        default_teacher_kwargs: Dict[str, Any] = {
+            "temperature": 1.0,
+            "max_tokens": 16000,
+        }
+        self.teacher_model_kwargs = {
+            **default_teacher_kwargs,
+            **(teacher_model_kwargs or {}),
+        }
         self.template_infer_n_samples = template_infer_n_samples
         self.teacher_system_prompt = teacher_system_prompt
         self.teacher_infer_max_retries = max(0, int(teacher_infer_max_retries))
@@ -148,7 +154,7 @@ class BayesianSearchOptimizer(BaseOptimizer):
         data_mapper: BasicDataMapper,
         dataset: List[Dict[str, Any]],
         initial_prompts: List[str],
-        **kwargs: Any
+        **kwargs: Any,
     ) -> OptimizationResult:
         logging.info("--- Starting Bayesian Search Optimization ---")
 
@@ -163,7 +169,9 @@ class BayesianSearchOptimizer(BaseOptimizer):
         if self.infer_example_template_via_teacher:
             try:
                 self._runtime_example_template = self._infer_example_template(dataset)
-                logging.info(f"Inferred example template via teacher model: \n {self._runtime_example_template}")
+                logging.info(
+                    f"Inferred example template via teacher model: \n {self._runtime_example_template}"
+                )
             except Exception as e:
                 logging.warning(f"Falling back to default example_template. Error: {e}")
                 self._runtime_example_template = None
@@ -185,19 +193,21 @@ class BayesianSearchOptimizer(BaseOptimizer):
             if remaining_needed > 0:
                 if self.allow_repeats:
                     # Repeats allowed: sample with replacement
-                    more = [rng.randrange(len(dataset)) for _ in range(remaining_needed)]
+                    more = [
+                        rng.randrange(len(dataset)) for _ in range(remaining_needed)
+                    ]
                     selected_indices.extend(more)
                 else:
                     # Unique sampling: sample without replacement from remaining pool
-                    pool = [i for i in range(len(dataset)) if i not in set(selected_indices)]
+                    pool = [
+                        i for i in range(len(dataset)) if i not in set(selected_indices)
+                    ]
                     take = min(remaining_needed, len(pool))
                     selected_indices.extend(rng.sample(pool, take))
 
             # Format the selected examples for few-shot
             demo_examples = [dataset[i] for i in selected_indices]
-            example_strings = [
-                self._format_example(ex) for ex in demo_examples
-            ]
+            example_strings = [self._format_example(ex) for ex in demo_examples]
             few_shot_block = self._build_few_shot_block(example_strings)
 
             # Build the full prompt
@@ -236,7 +246,9 @@ class BayesianSearchOptimizer(BaseOptimizer):
         return OptimizationResult(
             best_generator=best_generator,
             history=history,
-            final_score=float(study.best_value) if study.best_value is not None else 0.0,
+            final_score=float(study.best_value)
+            if study.best_value is not None
+            else 0.0,
         )
 
     def _score_prompt(
@@ -269,20 +281,26 @@ class BayesianSearchOptimizer(BaseOptimizer):
 
     def _infer_example_template(self, dataset: List[Dict[str, Any]]) -> str:
         sample_size = min(self.template_infer_n_samples, max(1, len(dataset)))
-        sample = random.sample(dataset, sample_size) if len(dataset) > sample_size else dataset
+        sample = (
+            random.sample(dataset, sample_size)
+            if len(dataset) > sample_size
+            else dataset
+        )
 
         # Build a minimal payload: include keys and a few short examples limited to those keys
         keys: List[str] = sorted({k for ex in sample for k in ex.keys()})
         trimmed_examples: List[Dict[str, Any]] = [
             {k: str(ex.get(k, ""))[:500] for k in keys} for ex in sample
         ]
-        user_payload = json.dumps({"keys": keys, "examples": trimmed_examples}, ensure_ascii=False)
+        user_payload = json.dumps(
+            {"keys": keys, "examples": trimmed_examples}, ensure_ascii=False
+        )
 
         prompt_template = (
             f"{self.teacher_system_prompt}\n\n"
             "Available keys:\n{keys}\n\n"
             "Examples (JSON):\n{examples_json}\n\n"
-            "Respond ONLY with a JSON object like {{\"example_template\": \"...\"}}."
+            'Respond ONLY with a JSON object like {{"example_template": "..."}}.'
         )
 
         teacher = LiteLLMGenerator(self.teacher_model_name, prompt_template)
@@ -319,7 +337,9 @@ class BayesianSearchOptimizer(BaseOptimizer):
             pass
         # Try to extract JSON object containing example_template
         try:
-            match = re.search(r"\{[\s\S]*?\"example_template\"\s*:\s*\"[\s\S]*?\"[\s\S]*?\}", content)
+            match = re.search(
+                r"\{[\s\S]*?\"example_template\"\s*:\s*\"[\s\S]*?\"[\s\S]*?\}", content
+            )
             if match:
                 obj = json.loads(match.group(0))
                 tmpl = obj.get("example_template")

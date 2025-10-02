@@ -9,15 +9,15 @@ import pandas as pd
 from dotenv import load_dotenv
 
 # --- Framework Imports ---
-from prompt_optimizer.base.base_optimizer import BaseOptimizer
-from prompt_optimizer.generators import LiteLLMGenerator
-from prompt_optimizer.datamappers import BasicDataMapper
-from prompt_optimizer.base.evaluator import Evaluator
-from prompt_optimizer.types import OptimizationResult
+from fi.opt.base.base_optimizer import BaseOptimizer
+from fi.opt.generators import LiteLLMGenerator
+from fi.opt.datamappers import BasicDataMapper
+from fi.opt.base.evaluator import Evaluator
+from fi.types import OptimizationResult
 from fi.evals.metrics import BLEUScore
 
 # --- Import All Optimizers ---
-from prompt_optimizer.optimizers import (
+from fi.opt.optimizers import (
     RandomSearchOptimizer,
     ProTeGi,
     MetaPromptOptimizer,
@@ -25,7 +25,7 @@ from prompt_optimizer.optimizers import (
     PromptWizardOptimizer,
     BayesianSearchOptimizer,
 )
-from prompt_optimizer import setup_logging
+from fi.utils import setup_logging
 
 # ==============================================================================
 # Configuration

@@ -1,7 +1,7 @@
 import logging
 import sys
 
-PACKAGE_LOGGER_NAME = "prompt_optimizer"
+PACKAGE_LOGGER_NAME = "fi.opt"
 
 
 def setup_logging(

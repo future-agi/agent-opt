@@ -56,55 +56,6 @@ class GradientVariations(BaseModel):
     variations: List[str] = Field(description="A list of generated text strings.")
 
 
-class BanditSelector:
-    """Implements the UCB bandit algorithm for efficient prompt selection."""
-
-    def __init__(self, candidate_prompts: List[str], c: float = 2.0):
-        self.prompts = candidate_prompts
-        self.n_prompts = len(candidate_prompts)
-        self.c = c  # Exploration parameter
-        self.prompt_to_idx = {p: i for i, p in enumerate(self.prompts)}
-
-        self.counts = np.zeros(self.n_prompts)
-        self.scores = np.zeros(self.n_prompts)
-        self.total_pulls = 0
-
-    def select_arms(self, num_arms: int):
-        """Selects the best arms (prompts) to pull based on UCB scores."""
-        # Give every arm at least one chance
-        untested_indices = np.where(self.counts == 0)[0]
-        if len(untested_indices) > 0:
-            return [(i, self.prompts[i]) for i in untested_indices[:num_arms]]
-
-        # UCB calculation
-        average_scores = self.scores / self.counts
-        exploration_term = self.c * np.sqrt(np.log(self.total_pulls) / self.counts)
-        ucb_scores = average_scores + exploration_term
-
-        # Get the indices of the top arms
-        top_indices = np.argsort(ucb_scores)[-num_arms:][::-1]
-        return [(i, self.prompts[i]) for i in top_indices]
-
-    def update(self, prompt_idx: int, score: float, num_samples: int):
-        """Updates the scores and counts for a pulled arm."""
-        self.scores[prompt_idx] += score * num_samples
-        self.counts[prompt_idx] += num_samples
-        self.total_pulls += num_samples
-
-    def get_best_prompts(self, num_prompts: int) -> List[str]:
-        """Returns the top prompts based on their empirical average score."""
-        if self.n_prompts == 0:
-            return []
-        average_scores = np.divide(
-            self.scores,
-            self.counts,
-            out=np.zeros_like(self.scores),
-            where=self.counts != 0,
-        )
-        top_indices = np.argsort(average_scores)[-num_prompts:][::-1]
-        return [self.prompts[i] for i in top_indices]
-
-
 class ProTeGi(BaseOptimizer):
     """
     A corrected and robust implementation of the ProTeGi optimizer.
@@ -312,15 +263,12 @@ class ProTeGi(BaseOptimizer):
     def _parse_variations_from_json(text: str) -> List[str]:
         text = text.strip()
 
-        # --- Stage 1: Try to parse the entire string as JSON ---
         try:
             data = json.loads(text)
             return GradientVariations.model_validate(data).variations
         except (json.JSONDecodeError, ValidationError):
-            # This is expected if there's extra text, so we continue.
             pass
 
-        # --- Stage 2: Look for a JSON markdown code block ---
         try:
             match = re.search(r"```json\s*(\{.*?\})\s*```", text, re.DOTALL)
             if match:
@@ -330,7 +278,6 @@ class ProTeGi(BaseOptimizer):
         except (json.JSONDecodeError, ValidationError):
             pass
 
-        # --- Stage 3: Greedy fallback to find the first '{' and last '}' ---
         try:
             start_index = text.find("{")
             end_index = text.rfind("}")
@@ -339,7 +286,6 @@ class ProTeGi(BaseOptimizer):
                 data = json.loads(json_str)
                 return GradientVariations.model_validate(data).variations
         except (json.JSONDecodeError, ValidationError) as e:
-            # If all parsing attempts fail, log the error and return empty.
             logging.error(
                 f"Failed to parse teacher model JSON response after all fallbacks: {e}"
             )
