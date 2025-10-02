@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "prompt-optimizer"
+name = "agent-opt"
 version = "0.0.1"
 authors = [
   { name="Future AGI", email="hello@futureagi.io" },
@@ -19,12 +19,10 @@ dependencies = [
     "openai>=1.108.2",
     "python-dotenv>=1.0.0",
     "optuna>=3.6.1",
+    "fi>=0.0.2",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-
-[tool.setuptools.packages.find]
-where = ["src"]
