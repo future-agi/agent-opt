@@ -1,6 +1,6 @@
 # agent-opt
 
-A powerful Python SDK for automated prompt optimization using state-of-the-art algorithms and LLM-as-a-judge evaluation.
+Python SDK for automated workflow optimization using state-of-the-art optimization algorithms and various evaluation metrics from our [`ai-evaluation`](https://github.com/futureagi/ai-evaluation) library.
 
 ## Overview
 
@@ -17,7 +17,7 @@ A powerful Python SDK for automated prompt optimization using state-of-the-art a
   - PromptWizard
   - GEPA (Genetic Pareto)
 
-- **Flexible Evaluation**: Support for multiple evaluation backends
+- **Flexible Evaluation**: All evaluation backends are powered by FutureAGI's [`ai-evaluation`](https://github.com/futureagi/ai-evaluation) library, supporting:
 
   - Heuristic metrics (BLEU, ROUGE, etc.)
   - Custom LLM-as-a-judge metrics
