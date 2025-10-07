@@ -426,12 +426,6 @@ src/fi/opt/
 ├── datamappers/       # Data transformation utilities
 ├── generators/        # LLM generator implementations
 ├── optimizers/        # Optimization algorithms
-│   ├── bayesian/      # Bayesian search
-│   ├── protegi/       # ProTeGi optimizer
-│   ├── meta_prompt/   # Meta-prompt optimizer
-│   ├── gepa/          # GEPA optimizer
-│   ├── prompt_wizard/ # PromptWizard optimizer
-│   └── random/        # Random search
 ├── utils/             # Helper utilities
 └── types.py           # Type definitions
 ```
