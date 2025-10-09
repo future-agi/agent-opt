@@ -1,38 +1,81 @@
-# agent-opt
+<div align="center">
 
-Python SDK for automated workflow optimization using state-of-the-art optimization algorithms and various evaluation metrics from our [`ai-evaluation`](https://github.com/futureagi/ai-evaluation) library.
+# 🎯 Agent Opt
 
-## Overview
+**Automated Workflow Optimization with State-of-the-Art Algorithms**  
+Built by [Future AGI](https://futureagi.com) | [Docs](https://docs.futureagi.com) | [Platform](https://app.futureagi.com)
 
-**agent-opt** is a comprehensive framework for optimizing prompts through iterative refinement. It supports multiple optimization algorithms, flexible evaluation strategies, and seamless integration with popular LLM providers through LiteLLM.
+---
 
-## Features
+### 🚀 Try it Now
 
-- **Multiple Optimization Algorithms**: Choose from 6 different optimization strategies
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1XjOUlEwUk-S0nl8dBb16iZHgr-XpXsnp?usp=sharing)
 
-  - Random Search
-  - Bayesian Search (with Optuna)
-  - ProTeGi (Prompt Optimization with Textual Gradients)
-  - Meta-Prompt
-  - PromptWizard
-  - GEPA (Genetic Pareto)
+</div>
 
-- **Flexible Evaluation**: All evaluation backends are powered by FutureAGI's [`ai-evaluation`](https://github.com/futureagi/ai-evaluation) library, supporting:
+---
 
-  - Heuristic metrics (BLEU, ROUGE, etc.)
-  - Custom LLM-as-a-judge metrics
-  - FutureAGI platform integration
+## 🚀 Overview
 
-- **Easy Integration**: Works with any LLM through LiteLLM
-- **Extensible Architecture**: Clean abstractions for custom optimizers, generators, and evaluators
+**agent-opt** is a comprehensive Python SDK for optimizing prompts through iterative refinement. Powered by state-of-the-art optimization algorithms and flexible evaluation strategies from our [`ai-evaluation`](https://github.com/future-agi/ai-evaluation) library, agent-opt helps you discover the best prompts for your LLM workflows automatically.
 
-## Installation
+- 🧬 **Smart Optimization**: 6 proven algorithms from random search to genetic evolution
+- 📊 **Flexible Evaluation**: Heuristic metrics, LLM-as-a-judge, and platform integration
+- ⚡ **Easy Integration**: Works with any LLM through LiteLLM
+- 🔧 **Extensible Design**: Clean abstractions for custom optimizers and evaluators
+
+---
+
+## 🎨 Features
+
+### 🧬 Multiple Optimization Algorithms
+
+Choose from 6 battle-tested optimization strategies:
+
+| Algorithm           | Best For                    | Key Feature                                   |
+| ------------------- | --------------------------- | --------------------------------------------- |
+| **Random Search**   | Quick baselines             | Simple random variations                      |
+| **Bayesian Search** | Few-shot optimization       | Intelligent hyperparameter tuning with Optuna |
+| **ProTeGi**         | Gradient-based refinement   | Textual gradients for iterative improvement   |
+| **Meta-Prompt**     | Teacher-driven optimization | Uses powerful models to analyze and rewrite   |
+| **PromptWizard**    | Multi-stage refinement      | Mutation, critique, and refinement pipeline   |
+| **GEPA**            | Complex solution spaces     | Genetic Pareto evolutionary optimization      |
+
+### 📊 Flexible Evaluation
+
+All evaluation backends powered by FutureAGI's [`ai-evaluation`](https://github.com/future-agi/ai-evaluation) library:
+
+- ✅ **Heuristic Metrics**: BLEU, ROUGE, embedding similarity, and more
+- 🧠 **LLM-as-a-Judge**: Custom criteria with any LLM provider
+- 🎯 **FutureAGI Platform**: 50+ pre-built evaluation templates
+- 🔌 **Custom Metrics**: Build your own evaluation logic
+
+### 🔧 Easy Integration
+
+- Works with **any LLM** through LiteLLM (OpenAI, Anthropic, Google, etc.)
+- Simple Python API with sensible defaults
+- Comprehensive logging and progress tracking
+- Clean separation of concerns
+
+---
+
+## 📦 Installation
 
 ```bash
 pip install agent-opt
 ```
 
-## Quick Start
+**Requirements:**
+
+- Python >= 3.10
+- ai-evaluation >= 0.1.9
+- gepa >= 0.0.17
+- litellm >= 1.35.2
+- optuna >= 3.6.1
+
+---
+
+## 🧑‍💻 Quick Start
 
 ```python
 from fi.opt.generators import LiteLLMGenerator
@@ -43,7 +86,11 @@ from fi.evals.metrics import BLEUScore
 
 # 1. Set up your dataset
 dataset = [
-    {"context": "Paris is the capital of France", "question": "What is the capital of France?", "answer": "Paris"},
+    {
+        "context": "Paris is the capital of France",
+        "question": "What is the capital of France?",
+        "answer": "Paris"
+    },
     # ... more examples
 ]
 
@@ -62,7 +109,7 @@ data_mapper = BasicDataMapper(
 # 4. Choose and configure an optimizer
 optimizer = BayesianSearchOptimizer(
     inference_model_name="gpt-4o-mini",
-    teacher_model_name="gpt-5",
+    teacher_model_name="gpt-4o",
     n_trials=10
 )
 
@@ -80,11 +127,13 @@ print(f"Best Score: {result.final_score:.4f}")
 print(f"Best Prompt: {result.best_generator.get_prompt_template()}")
 ```
 
-## Core Components
+---
 
-### Generators
+## 🏗️ Core Components
 
-Generators execute prompts and return responses. The framework includes `LiteLLMGenerator` for easy integration with any LLM provider.
+### 🤖 Generators
+
+Generators execute prompts and return responses. Use `LiteLLMGenerator` for seamless integration with any LLM provider.
 
 ```python
 from fi.opt.generators import LiteLLMGenerator
@@ -95,11 +144,13 @@ generator = LiteLLMGenerator(
 )
 ```
 
-### Evaluators
+---
+
+### 📊 Evaluators
 
 Evaluators score generated outputs using various strategies:
 
-**Local Metrics (Heuristic)**
+#### **Heuristic Metrics**
 
 ```python
 from fi.opt.base.evaluator import Evaluator
@@ -108,35 +159,37 @@ from fi.evals.metrics import BLEUScore
 evaluator = Evaluator(metric=BLEUScore())
 ```
 
-**LLM-as-a-Judge**
+#### **LLM-as-a-Judge**
 
 ```python
 from fi.evals.llm import LiteLLMProvider
 from fi.evals.metrics import CustomLLMJudge
+
 # LLM provider used by the judge
 provider = LiteLLMProvider()
+
 # Create custom LLM judge metric
 correctness_judge_config = {
     "name": "correctness_judge",
-    "grading_criteria": '''You are evaluating an AI's answer to a question. The score must be 1.0 if the 'response'
-is semantically equivalent to the 'expected_response' (the ground truth). The score should be 0.0 if it is incorrect.
-Partial credit is acceptable. For example, if the expected answer is "Gustave Eiffel" and the response is
-"The tower was designed by Eiffel", a score of 0.8 is appropriate.''',
+    "grading_criteria": '''You are evaluating an AI's answer to a question.
+    The score must be 1.0 if the 'response' is semantically equivalent to the
+    'expected_response' (the ground truth). The score should be 0.0 if incorrect.
+    Partial credit is acceptable.'''
 }
 
-# Instantiate the judge and pass the metric to the evaluator
+# Instantiate the judge and pass to evaluator
 correctness_judge = CustomLLMJudge(
     provider=provider,
     config=correctness_judge_config,
-    # pass litellm completion params as kwargs!
     model="gemini/gemini-2.5-flash",
-    temperature=0.4)
+    temperature=0.4
+)
 evaluator = Evaluator(metric=correctness_judge)
 ```
 
-**FutureAGI Platform**
+#### **FutureAGI Platform**
 
-Choose from our wide range of evaluations
+Access 50+ pre-built evaluation templates:
 
 ```python
 evaluator = Evaluator(
@@ -147,7 +200,9 @@ evaluator = Evaluator(
 )
 ```
 
-### Data Mappers
+---
+
+### 🗺️ Data Mappers
 
 Data mappers transform your data into the format expected by evaluators:
 
@@ -163,9 +218,11 @@ mapper = BasicDataMapper(
 )
 ```
 
-## Optimization Algorithms
+---
 
-### Bayesian Search
+## ⚙️ Optimization Algorithms
+
+### 🔍 Bayesian Search
 
 Uses Optuna for intelligent hyperparameter optimization of few-shot example selection.
 
@@ -177,19 +234,26 @@ optimizer = BayesianSearchOptimizer(
     max_examples=8,
     n_trials=20,
     inference_model_name="gpt-4o-mini",
-    teacher_model_name="gpt-5"
+    teacher_model_name="gpt-4o"
 )
 ```
 
-### ProTeGi
+**Best for:** Few-shot prompt optimization with automatic example selection
 
-Gradient-based prompt optimization that iteratively refines prompts based on error analysis.
+---
+
+### 🎯 ProTeGi
+
+Gradient-based prompt optimization that iteratively refines prompts through error analysis.
 
 ```python
 from fi.opt.optimizers import ProTeGi
 from fi.opt.generators import LiteLLMGenerator
 
-teacher = LiteLLMGenerator(model="gpt-5", prompt_template="{prompt}")
+teacher = LiteLLMGenerator(
+    model="gpt-4o",
+    prompt_template="{prompt}"
+)
 optimizer = ProTeGi(
     teacher_generator=teacher,
     num_gradients=4,
@@ -197,7 +261,11 @@ optimizer = ProTeGi(
 )
 ```
 
-### Meta-Prompt
+**Best for:** Iterative refinement with textual gradients
+
+---
+
+### 🧠 Meta-Prompt
 
 Uses a powerful teacher model to analyze performance and rewrite prompts.
 
@@ -210,9 +278,13 @@ optimizer = MetaPromptOptimizer(
 )
 ```
 
-### GEPA
+**Best for:** Leveraging powerful models for prompt refinement
 
-Evolutionary optimization using the GEPA library.
+---
+
+### 🧬 GEPA (Genetic Pareto)
+
+Evolutionary optimization using the GEPA library for complex solution spaces.
 
 ```python
 from fi.opt.optimizers import GEPAOptimizer
@@ -223,7 +295,11 @@ optimizer = GEPAOptimizer(
 )
 ```
 
-### PromptWizard
+**Best for:** Multi-objective optimization with genetic algorithms
+
+---
+
+### 🪄 PromptWizard
 
 Multi-stage optimization with mutation, critique, and refinement.
 
@@ -237,7 +313,11 @@ optimizer = PromptWizardOptimizer(
 )
 ```
 
-### Random Search
+**Best for:** Comprehensive multi-phase optimization pipeline
+
+---
+
+### 🎲 Random Search
 
 Simple baseline that tries random prompt variations.
 
@@ -246,14 +326,18 @@ from fi.opt.optimizers import RandomSearchOptimizer
 
 optimizer = RandomSearchOptimizer(
     generator=generator,
-    teacher_model="gpt-5",
+    teacher_model="gpt-4o",
     num_variations=5
 )
 ```
 
-## Advanced Usage
+**Best for:** Quick baselines and sanity checks
 
-### Custom Evaluation Metrics
+---
+
+## 🔧 Advanced Usage
+
+### 🎨 Custom Evaluation Metrics
 
 Create custom heuristic metrics by extending `BaseMetric`:
 
@@ -262,14 +346,18 @@ from fi.evals.metrics.base_metric import BaseMetric
 
 class CustomMetric(BaseMetric):
     @property
-    def metric_name():
-        return "your custom metric name"
+    def metric_name(self):
+        return "your_custom_metric"
+
     def compute_one(self, inputs):
         # Your evaluation logic here
-        pass
+        score = your_scoring_logic(inputs)
+        return score
 ```
 
-### Logging Configuration
+---
+
+### 📝 Logging Configuration
 
 ```python
 from fi.opt.utils import setup_logging
@@ -283,7 +371,9 @@ setup_logging(
 )
 ```
 
-### Custom Prompt Builders
+---
+
+### 🏗️ Custom Prompt Builders
 
 For complex prompt construction:
 
@@ -297,12 +387,17 @@ optimizer = BayesianSearchOptimizer(
 )
 ```
 
-## Environment Variables
+---
 
-Set up your API keys:
+## 🔑 Environment Setup
+
+### API Keys
+
+Set up your API keys for LLM providers and FutureAGI:
 
 ```bash
-export OPENAI_API_KEY="your_openai_key" # Or GEMINI_API_KEY if using gemini models etc.
+export OPENAI_API_KEY="your_openai_key"
+export GEMINI_API_KEY="your_gemini_key"  # If using Gemini
 export FI_API_KEY="your_futureagi_key"
 export FI_SECRET_KEY="your_futureagi_secret"
 ```
@@ -315,20 +410,15 @@ FI_API_KEY=your_futureagi_key
 FI_SECRET_KEY=your_futureagi_secret
 ```
 
-## Examples
+---
 
-Check out the `examples/FutureAGI_Agent_Optimizer.ipynb` notebook for a complete example!
+## 📚 Examples & Tutorials
 
-## Requirements
+🎯 **Complete Example**: Check out `examples/FutureAGI_Agent_Optimizer.ipynb` for a comprehensive walkthrough!
 
-- Python >= 3.10
-- ai-evaluation >= 0.1.9
-- gepa >= 0.0.17
-- litellm >= 1.35.2
-- optuna >= 3.6.1
-- Additional dependencies listed in `pyproject.toml`
+---
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 src/fi/opt/
@@ -336,18 +426,52 @@ src/fi/opt/
 ├── datamappers/       # Data transformation utilities
 ├── generators/        # LLM generator implementations
 ├── optimizers/        # Optimization algorithms
-├── utils/            # Helper utilities
-└── types.py          # Type definitions
+├── utils/             # Helper utilities
+└── types.py           # Type definitions
 ```
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit issues or pull requests.
-
-## Support
-
-For questions and support, please contact: support@futureagi.com
 
 ---
 
-Built with ❤️ by Future AGI
+## 🔌 Related Projects
+
+- 🧪 [ai-evaluation](https://github.com/future-agi/ai-evaluation): Comprehensive LLM evaluation framework with 50+ metrics
+- 🚦 [traceAI](https://github.com/future-agi/traceAI): Add tracing & observability to your optimized workflows
+
+---
+
+## 🗺️ Roadmap
+
+- [x] **Core Optimization Algorithms**
+- [x] **ai-evaluation Integration**
+- [x] **LiteLLM Support**
+- [x] **Bayesian Optimization**
+- [x] **ProTeGi & Meta-Prompt**
+- [x] **GEPA Integration**
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! To report issues, suggest features, or contribute improvements:
+
+1. Open a [GitHub issue](https://github.com/future-agi/agent-opt/issues)
+2. Submit a pull request
+3. Join our community discussions
+
+---
+
+## 💬 Support
+
+For questions and support:
+
+📧 **Email**: support@futureagi.com  
+📚 **Documentation**: [docs.futureagi.com](https://docs.futureagi.com)  
+🌐 **Platform**: [app.futureagi.com](https://app.futureagi.com)
+
+---
+
+<div align="center">
+
+Built with ❤️ by [Future AGI](https://futureagi.com)
+
+</div>
