@@ -76,7 +76,9 @@ class Evaluator:
                     "To use the FutureAGI platform, you must provide an 'fi_api_key' and 'fi_secret_key' or set the FI_API_KEY and FI_SECRET_KEY environment variable."
                 )
 
-            self._online_client = FAGIEvaluator(fi_api_key=api_key)
+            self._online_client = FAGIEvaluator(
+                fi_api_key=api_key, fi_secret_key=secret
+            )
             self._online_eval_template = eval_template
             self._online_model_name = eval_model_name
             logger.info(
@@ -163,11 +165,15 @@ class Evaluator:
                     inputs=single_input,
                     model_name=self._online_model_name,
                 )
+                logger.debug(
+                    f"Online evaluation result: {json.dumps(batch_result.model_dump_json(), indent=2, ensure_ascii=False)}"
+                )
                 eval_res = (
                     batch_result.eval_results[0]
                     if batch_result and batch_result.eval_results
                     else None
                 )
+                logger.debug(f"Online evaluation result: {eval_res}")
                 if eval_res and isinstance(eval_res.output, (int, float)):
                     score = max(0.0, min(1.0, float(eval_res.output)))
                     results.append(
@@ -176,7 +182,21 @@ class Evaluator:
                     logger.info(
                         f"Input #{i + 1} evaluated successfully. Score: {score:.4f}\nReason: {eval_res.reason}"
                     )
-
+                elif eval_res and isinstance(eval_res.output, str):
+                    if eval_res.output.lower() in ["pass", "passed", "true"]:
+                        results.append(
+                            EvaluationResult(score=1.0, reason=eval_res.reason or "")
+                        )
+                        logger.info(
+                            f"Input #{i + 1} evaluated successfully. Reason: {eval_res.reason}"
+                        )
+                    else:
+                        results.append(
+                            EvaluationResult(score=0.0, reason=eval_res.reason or "")
+                        )
+                        logger.info(
+                            f"Input #{i + 1} evaluated successfully. Reason: {eval_res.reason}"
+                        )
                 else:
                     reason = "Online evaluation failed or returned invalid output."
                     if eval_res:
