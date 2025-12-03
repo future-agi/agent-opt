@@ -12,11 +12,10 @@ description = "A library for prompt optimization."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "ai-evaluation>=0.1.9",
+    "ai-evaluation>=0.2.1",
     "gepa>=0.0.17",
     "litellm>=1.35.2",
     "numpy>=1.26.4",
-    "openai>=1.108.2",
     "python-dotenv>=1.0.0",
     "optuna>=3.6.1",
     "fi>=0.0.2",
