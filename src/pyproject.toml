@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-opt"
-version = "0.0.2"
+version = "0.0.3"
 authors = [
   { name="Future AGI", email="hello@futureagi.io" },
 ]
@@ -12,11 +12,10 @@ description = "A library for prompt optimization."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "ai-evaluation>=0.1.9",
+    "ai-evaluation>=0.2.2",
     "gepa>=0.0.17",
     "litellm>=1.35.2",
     "numpy>=1.26.4",
-    "openai>=1.108.2",
     "python-dotenv>=1.0.0",
     "optuna>=3.6.1",
     "fi>=0.0.2",
