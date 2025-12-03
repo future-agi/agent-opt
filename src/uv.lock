@@ -18,7 +18,7 @@ wheels = [
 
 [[package]]
 name = "agent-opt"
-version = "0.0.2"
+version = "0.0.3"
 source = { editable = "." }
 dependencies = [
     { name = "ai-evaluation" },
@@ -32,7 +32,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "ai-evaluation", specifier = ">=0.2.1" },
+    { name = "ai-evaluation", specifier = ">=0.2.2" },
     { name = "fi", specifier = ">=0.0.2" },
     { name = "gepa", specifier = ">=0.0.17" },
     { name = "litellm", specifier = ">=1.35.2" },
