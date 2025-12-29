@@ -3,7 +3,7 @@ import logging
 import time
 import json
 from pydantic import BaseModel, Field, ValidationError
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from ..base.evaluator import Evaluator
 from ..base.base_optimizer import BaseOptimizer
@@ -11,6 +11,7 @@ from ..base.base_generator import BaseGenerator
 
 from ..datamappers import BasicDataMapper
 from ..types import IterationHistory, OptimizationResult
+from ..utils.early_stopping import EarlyStoppingConfig, EarlyStoppingChecker
 
 logger = logging.getLogger(__name__)
 
@@ -65,10 +66,17 @@ class RandomSearchOptimizer(BaseOptimizer):
         evaluator: Evaluator,
         data_mapper: BasicDataMapper,
         dataset: List[Dict[str, Any]],
+        early_stopping: Optional[EarlyStoppingConfig] = None,
         **kwargs: Any,
     ) -> OptimizationResult:
         logger.info("--- Starting Random Search Optimization ---")
         optimization_start_time = time.time()
+
+        # Initialize early stopping checker
+        checker = None
+        if early_stopping and early_stopping.is_enabled():
+            checker = EarlyStoppingChecker(early_stopping)
+            logger.info(f"Early stopping enabled: {early_stopping}")
 
         initial_prompt = self.generator.get_prompt_template()
         best_prompt = initial_prompt
@@ -126,6 +134,15 @@ class RandomSearchOptimizer(BaseOptimizer):
                 )
             )
 
+            # Check early stopping
+            if checker:
+                num_evals = len(dataset)
+                if checker.should_stop(avg_score, num_evals):
+                    logger.info(
+                        f"Early stopping triggered: {checker.get_state()['stop_reason']}"
+                    )
+                    break
+
             if avg_score > best_score:
                 best_score = avg_score
                 best_prompt = variation
@@ -143,8 +160,19 @@ class RandomSearchOptimizer(BaseOptimizer):
             f"--- Random Search Optimization finished in {optimization_end_time - optimization_start_time:.2f} seconds ---"
         )
 
+        # Build result with early stopping metadata
         return OptimizationResult(
-            best_generator=self.generator, history=history, final_score=best_score
+            best_generator=self.generator,
+            history=history,
+            final_score=best_score,
+            early_stopped=checker.get_state()["stopped"] if checker else False,
+            stop_reason=checker.get_state()["stop_reason"] if checker else None,
+            total_iterations=len(history),
+            total_evaluations=(
+                checker.get_state()["total_evaluations"]
+                if checker
+                else len(history) * len(dataset)
+            ),
         )
 
     def _generate_variations(self, initial_prompt: str) -> List[str]:

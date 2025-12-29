@@ -10,6 +10,7 @@ from ..datamappers.basic_mapper import BasicDataMapper
 from ..base.evaluator import Evaluator
 from ..generators.litellm import LiteLLMGenerator
 from ..types import IterationHistory, OptimizationResult
+from ..utils.early_stopping import EarlyStoppingConfig, EarlyStoppingChecker
 import logging
 
 logger = logging.getLogger(__name__)
@@ -89,8 +90,15 @@ class MetaPromptOptimizer(BaseOptimizer):
         task_description: str = "I want to improve my prompt.",
         num_rounds: Optional[int] = 5,
         eval_subset_size: Optional[int] = 40,
+        early_stopping: Optional[EarlyStoppingConfig] = None,
     ) -> OptimizationResult:
         logger.info("--- Starting Meta-Prompt Optimization ---")
+
+        # Initialize early stopping checker
+        checker = None
+        if early_stopping and early_stopping.is_enabled():
+            checker = EarlyStoppingChecker(early_stopping)
+            logger.info(f"Early stopping enabled: {early_stopping}")
 
         if not initial_prompts:
             raise ValueError("Initial prompts list cannot be empty.")
@@ -125,6 +133,15 @@ class MetaPromptOptimizer(BaseOptimizer):
                 best_prompt = current_prompt
                 logger.info(f"New best score found: {best_score:.4f}")
 
+            # Check early stopping
+            if checker:
+                num_evals = len(eval_subset)
+                if checker.should_stop(current_score, num_evals):
+                    logger.info(
+                        f"Early stopping triggered: {checker.get_state()['stop_reason']}"
+                    )
+                    break
+
             # 2. Use the teacher model to generate a new, improved prompt
             annotated_results_str = self._format_results(iteration_history, eval_subset)
 
@@ -157,10 +174,20 @@ class MetaPromptOptimizer(BaseOptimizer):
                 )
 
         final_best_generator = LiteLLMGenerator(self.teacher.model_name, best_prompt)
+
+        # Build result with early stopping metadata
         return OptimizationResult(
             best_generator=final_best_generator,
             history=history,
             final_score=best_score,
+            early_stopped=checker.get_state()["stopped"] if checker else False,
+            stop_reason=checker.get_state()["stop_reason"] if checker else None,
+            total_iterations=len(history),
+            total_evaluations=(
+                checker.get_state()["total_evaluations"]
+                if checker
+                else sum(len(h.individual_results) for h in history)
+            ),
         )
 
     def _score_prompt(

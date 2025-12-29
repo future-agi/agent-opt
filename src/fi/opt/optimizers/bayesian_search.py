@@ -10,6 +10,7 @@ from ..types import OptimizationResult, IterationHistory, EvaluationResult
 from ..datamappers import BasicDataMapper
 from ..generators.litellm import LiteLLMGenerator
 from ..base.evaluator import Evaluator
+from ..utils.early_stopping import EarlyStoppingConfig, EarlyStoppingChecker
 
 
 TEACHER_SYSTEM_PROMPT = (
@@ -154,9 +155,16 @@ class BayesianSearchOptimizer(BaseOptimizer):
         data_mapper: BasicDataMapper,
         dataset: List[Dict[str, Any]],
         initial_prompts: List[str],
+        early_stopping: Optional[EarlyStoppingConfig] = None,
         **kwargs: Any,
     ) -> OptimizationResult:
         logging.info("--- Starting Bayesian Search Optimization ---")
+
+        # Initialize early stopping checker
+        checker = None
+        if early_stopping and early_stopping.is_enabled():
+            checker = EarlyStoppingChecker(early_stopping)
+            logging.info(f"Early stopping enabled: {early_stopping}")
 
         if not initial_prompts:
             raise ValueError("Initial prompts list cannot be empty.")
@@ -228,6 +236,16 @@ class BayesianSearchOptimizer(BaseOptimizer):
             logging.info(
                 f"Trial {trial.number}: Score={avg_score:.4f}, Num Examples={len(selected_indices)}"
             )
+
+            # Check early stopping
+            if checker:
+                eval_size = len(self._select_eval_subset(dataset))
+                if checker.should_stop(avg_score, eval_size):
+                    logging.info(
+                        f"Early stopping triggered: {checker.get_state()['stop_reason']}"
+                    )
+                    trial.study.stop()
+
             return avg_score
 
         study = optuna.create_study(
@@ -238,17 +256,30 @@ class BayesianSearchOptimizer(BaseOptimizer):
             study_name=self.study_name,
             load_if_exists=bool(self.storage and self.study_name),
         )
-        study.optimize(objective, n_trials=self.n_trials)
+
+        try:
+            study.optimize(objective, n_trials=self.n_trials)
+        except Exception as e:
+            logging.info(f"Optimization stopped: {e}")
 
         best_prompt = study.best_trial.user_attrs.get("prompt", initial_prompt)
         best_generator = LiteLLMGenerator(self.inference_model_name, best_prompt)
 
+        # Build result with early stopping metadata
         return OptimizationResult(
             best_generator=best_generator,
             history=history,
             final_score=float(study.best_value)
             if study.best_value is not None
             else 0.0,
+            early_stopped=checker.get_state()["stopped"] if checker else False,
+            stop_reason=checker.get_state()["stop_reason"] if checker else None,
+            total_iterations=len(history),
+            total_evaluations=(
+                checker.get_state()["total_evaluations"]
+                if checker
+                else sum(len(h.individual_results) for h in history)
+            ),
         )
 
     def _score_prompt(
