@@ -2,7 +2,7 @@ import json
 import logging
 import random
 import re
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, List, Set, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +14,7 @@ from ..datamappers.basic_mapper import BasicDataMapper
 from ..base.evaluator import Evaluator
 from ..generators.litellm import LiteLLMGenerator
 from ..types import IterationHistory, OptimizationResult
+from ..utils.early_stopping import EarlyStoppingConfig, EarlyStoppingChecker
 
 MUTATE_PROMPT = """
 You are an expert in prompt engineering. You will be given a task description and different styles known as meta prompts. Your task is to generate {num_variations} diverse variations of the following instruction by adaptively mixing meta prompt while keeping similar semantic meaning.
@@ -91,6 +92,7 @@ class PromptWizardOptimizer(BaseOptimizer):
         dataset: List[Dict[str, Any]],
         initial_prompts: List[str],
         task_description: str = "No task description given.",
+        early_stopping: Optional[EarlyStoppingConfig] = None,
         **kwargs: Any,
     ) -> OptimizationResult:
         eval_subset_size = kwargs.get("eval_subset_size", 25)
@@ -99,6 +101,12 @@ class PromptWizardOptimizer(BaseOptimizer):
         logger.debug(f"Initial prompts count: {len(initial_prompts)}")
         logger.debug(f"Dataset size: {len(dataset)}")
         logger.debug(f"Evaluation subset size: {eval_subset_size}")
+
+        # Initialize early stopping checker
+        checker = None
+        if early_stopping and early_stopping.is_enabled():
+            checker = EarlyStoppingChecker(early_stopping)
+            logger.info(f"Early stopping enabled: {early_stopping}")
 
         if not initial_prompts:
             raise ValueError("Initial prompts list cannot be empty.")
@@ -140,6 +148,16 @@ class PromptWizardOptimizer(BaseOptimizer):
             for idx, p in enumerate(top_prompts_this_round):
                 score = sorted_by_score[idx].average_score
                 logger.debug(f"  - Prompt (Score: {score:.4f}): '{p[:100]}...'")
+
+            # Check early stopping
+            if checker:
+                best_round_score = sorted_by_score[0].average_score
+                num_evals = len(candidate_pool) * len(eval_subset)
+                if checker.should_stop(best_round_score, num_evals):
+                    logger.info(
+                        f"Early stopping triggered: {checker.get_state()['stop_reason']}"
+                    )
+                    break
 
             # 3. Critique and Refine
             logger.info("Step 3: Critiquing and refining top prompts...")
@@ -195,10 +213,20 @@ class PromptWizardOptimizer(BaseOptimizer):
         logger.info(f"Final best prompt (Score: {best_score:.4f}): '{best_prompt}'")
 
         final_best_generator = LiteLLMGenerator(self.teacher.model_name, best_prompt)
+
+        # Build result with early stopping metadata
         return OptimizationResult(
             best_generator=final_best_generator,
             history=history,
             final_score=best_score,
+            early_stopped=checker.get_state()["stopped"] if checker else False,
+            stop_reason=checker.get_state()["stop_reason"] if checker else None,
+            total_iterations=len(history),
+            total_evaluations=(
+                checker.get_state()["total_evaluations"]
+                if checker
+                else sum(len(h.individual_results) for h in history)
+            ),
         )
 
     def _mutate_instruction(
