@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-opt"
-version = "0.0.3"
+version = "0.1.0"
 authors = [
   { name="Future AGI", email="hello@futureagi.io" },
 ]
