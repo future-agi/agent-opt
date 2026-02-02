@@ -27,11 +27,16 @@ class _InternalGEPAAdapter(GEPAAdapter[DataInst, Dict[str, Any], Dict[str, Any]]
     """
 
     def __init__(
-        self, generator_model: str, evaluator: Evaluator, data_mapper: BasicDataMapper
+        self,
+        generator_model: str,
+        evaluator: Evaluator,
+        data_mapper: BasicDataMapper,
+        history_list: List[IterationHistory],
     ):
         self.generator_model = generator_model
         self.evaluator = evaluator
         self.data_mapper = data_mapper
+        self.history_list = history_list
         logger.info(f"Initialized with generator_model: {generator_model}")
 
     def evaluate(
@@ -84,6 +89,16 @@ class _InternalGEPAAdapter(GEPAAdapter[DataInst, Dict[str, Any], Dict[str, Any]]
             {"generated_text": out, "full_result": res.model_dump()}
             for out, res in zip(generated_outputs, results)
         ]
+
+        # capture iteration history
+        avg_score = sum(scores) / len(scores) if scores else 0.0
+        self.history_list.append(
+            IterationHistory(
+                prompt=prompt_text,
+                average_score=avg_score,
+                individual_results=results,
+            )
+        )
 
         trajectories = []
         if capture_traces:
@@ -183,13 +198,14 @@ class GEPAOptimizer(BaseOptimizer):
 
         if not initial_prompts:
             raise ValueError("Initial prompts list cannot be empty for GEPAOptimizer.")
-
+        history: List[IterationHistory] = []
         # 1. Create the internal adapter that bridges our framework to GEPA
         logger.info("Creating internal GEPA adapter...")
         adapter = _InternalGEPAAdapter(
             generator_model=self.generator_model,
             evaluator=evaluator,
             data_mapper=data_mapper,
+            history_list=history,
         )
 
         # 2. Prepare the inputs for gepa.optimize
@@ -217,18 +233,9 @@ class GEPAOptimizer(BaseOptimizer):
         )
         logger.info(f"GEPA best candidate: {gepa_result.best_candidate}")
 
+        logger.info(f"Captured {len(history)} iterations in history.")
         # 4. Translate GEPA's result back into our framework's standard format
         logger.info("Translating GEPA result to OptimizationResult...")
-        history = [
-            IterationHistory(
-                prompt=cand.get("prompt", ""),
-                average_score=score,
-                individual_results=[],  # GEPA's final result doesn't expose per-example scores easily
-            )
-            for cand, score in zip(
-                gepa_result.candidates, gepa_result.val_aggregate_scores
-            )
-        ]
 
         final_best_generator = LiteLLMGenerator(
             model=self.generator_model,
