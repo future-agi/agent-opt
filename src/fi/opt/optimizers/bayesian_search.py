@@ -262,6 +262,12 @@ class BayesianSearchOptimizer(BaseOptimizer):
         except Exception as e:
             logging.info(f"Optimization stopped: {e}")
 
+        # Check if any trials completed before accessing best_trial
+        if not history:
+            raise RuntimeError(
+                "Optimization stopped before any trials completed successfully"
+            )
+
         best_prompt = study.best_trial.user_attrs.get("prompt", initial_prompt)
         best_generator = LiteLLMGenerator(self.inference_model_name, best_prompt)
 

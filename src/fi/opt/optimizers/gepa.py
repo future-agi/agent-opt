@@ -16,7 +16,11 @@ from ..datamappers.basic_mapper import BasicDataMapper
 from ..base.evaluator import Evaluator
 from ..generators.litellm import LiteLLMGenerator
 from ..types import OptimizationResult, IterationHistory
-from ..utils.early_stopping import EarlyStoppingConfig, EarlyStoppingChecker
+from ..utils.early_stopping import (
+    EarlyStoppingConfig,
+    EarlyStoppingChecker,
+    EarlyStoppingException,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -106,13 +110,9 @@ class _InternalGEPAAdapter(GEPAAdapter[DataInst, Dict[str, Any], Dict[str, Any]]
         # Check early stopping
         if self.early_stopping_checker:
             if self.early_stopping_checker.should_stop(avg_score, len(batch)):
-                logger.info(
-                    f"Early stopping triggered: "
-                    f"{self.early_stopping_checker.get_state()['stop_reason']}"
-                )
-                raise StopIteration(
-                    self.early_stopping_checker.get_state()["stop_reason"]
-                )
+                reason = self.early_stopping_checker.get_state()["stop_reason"]
+                logger.info(f"Early stopping triggered: {reason}")
+                raise EarlyStoppingException(reason)
 
         trajectories = []
         if capture_traces:
@@ -281,10 +281,10 @@ class GEPAOptimizer(BaseOptimizer):
                 ),
             )
 
-        except StopIteration as e:
+        except EarlyStoppingException as e:
             gepa_end_time = time.time()
             logger.info(
-                f"GEPA stopped early after {gepa_end_time - gepa_start_time:.2f}s: {e}"
+                f"GEPA stopped early after {gepa_end_time - gepa_start_time:.2f}s: {e.reason}"
             )
 
             # Use best from history
@@ -304,7 +304,7 @@ class GEPAOptimizer(BaseOptimizer):
                 history=history,
                 final_score=best_history.average_score,
                 early_stopped=True,
-                stop_reason=str(e),
+                stop_reason=e.reason,
                 total_iterations=len(history),
                 total_evaluations=(
                     checker.get_state()["total_evaluations"]

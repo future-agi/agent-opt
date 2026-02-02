@@ -5,6 +5,22 @@ from pydantic import BaseModel, Field
 logger = logging.getLogger(__name__)
 
 
+class EarlyStoppingException(Exception):
+    """
+    Exception raised when early stopping criteria are met during optimization.
+
+    This is a custom exception class to explicitly signal early termination,
+    distinguishing it from built-in StopIteration which is intended for
+    iterator protocol.
+
+    Attributes:
+        reason: Human-readable explanation of why early stopping was triggered
+    """
+    def __init__(self, reason: str):
+        self.reason = reason
+        super().__init__(reason)
+
+
 class EarlyStoppingConfig(BaseModel):
     """
     Configuration for early stopping criteria in optimization.
@@ -57,13 +73,16 @@ class EarlyStoppingConfig(BaseModel):
         Check if any early stopping criterion is configured.
 
         Returns:
-            True if at least one stopping criterion is set, False otherwise
+            True if at least one stopping criterion is set, False otherwise.
+
+        Note:
+            min_delta is not checked here because it only modifies patience
+            behavior and doesn't constitute a stopping criterion by itself.
         """
         return any(
             [
                 self.patience is not None,
                 self.min_score_threshold is not None,
-                self.min_delta is not None,
                 self.max_evaluations is not None,
             ]
         )
