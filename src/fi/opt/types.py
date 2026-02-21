@@ -40,3 +40,21 @@ class OptimizationResult(BaseModel):
     best_generator: Any
     history: List[IterationHistory]
     final_score: float = 0.0
+
+    # Early stopping metadata
+    early_stopped: bool = Field(
+        default=False,
+        description="Whether optimization was terminated early by a stopping criterion"
+    )
+    stop_reason: Optional[str] = Field(
+        default=None,
+        description="Explanation for early stopping (if applicable)"
+    )
+    total_iterations: int = Field(
+        default=0,
+        description="Total number of iterations completed"
+    )
+    total_evaluations: int = Field(
+        default=0,
+        description="Total number of dataset evaluations performed"
+    )
