@@ -1,0 +1,16 @@
+agent-opt
+Copyright (c) 2024-2026 Future AGI, Inc.
+
+This product is part of the Future AGI open-source ecosystem
+(https://github.com/future-agi/future-agi) and is licensed under the Apache
+License, Version 2.0 (the "License"). See the LICENSE file for the full
+license text, or obtain a copy at http://www.apache.org/licenses/LICENSE-2.0.
+
+This product includes or depends on the following third-party software:
+
+- ai-evaluation — https://github.com/future-agi/ai-evaluation
+- gepa — https://github.com/gepa-ai/gepa
+- litellm — https://github.com/BerriAI/litellm (MIT)
+- optuna — https://github.com/optuna/optuna (MIT)
+- numpy — https://numpy.org (BSD-3-Clause)
+- python-dotenv — https://github.com/theskumar/python-dotenv (BSD-3-Clause)
