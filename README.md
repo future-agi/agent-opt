@@ -1,5 +1,9 @@
 <div align="center">
 
+<a href="https://futureagi.com">
+  <img alt="Future AGI" src=".github/assets/logo.svg" height="64">
+</a>
+
 # agent-opt
 
 **Close the loop — six prompt-optimization algorithms, any LLM, any metric.**
