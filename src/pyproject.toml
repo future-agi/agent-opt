@@ -6,11 +6,27 @@ build-backend = "setuptools.build_meta"
 name = "agent-opt"
 version = "0.1.0"
 authors = [
-  { name="Future AGI", email="hello@futureagi.io" },
+  { name = "Future AGI", email = "hello@futureagi.io" },
 ]
-description = "A library for prompt optimization."
+description = "Close the loop: six prompt-optimization algorithms, any LLM, any metric. Part of the Future AGI open-source platform."
 readme = "README.md"
+license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
+keywords = [
+    "prompt-optimization",
+    "prompt-engineering",
+    "llm",
+    "llmops",
+    "ai-agents",
+    "llm-evaluation",
+    "agent-optimization",
+    "gepa",
+    "protegi",
+    "promptwizard",
+    "bayesian-optimization",
+    "litellm",
+    "future-agi",
+]
 dependencies = [
     "ai-evaluation>=0.2.2",
     "gepa>=0.0.17",
@@ -21,7 +37,25 @@ dependencies = [
     "fi>=0.0.2",
 ]
 classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
 ]
+
+[project.urls]
+Homepage = "https://github.com/future-agi/agent-opt"
+Documentation = "https://docs.futureagi.com/docs/optimization"
+Repository = "https://github.com/future-agi/agent-opt"
+Issues = "https://github.com/future-agi/agent-opt/issues"
+Changelog = "https://github.com/future-agi/agent-opt/releases"
+Discord = "https://discord.gg/UjZ2gRT5p"
