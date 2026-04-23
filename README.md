@@ -1,3 +1,5 @@
+![Company Logo](Logo.png)
+
 <div align="center">
 
 # 🎯 Agent Opt
@@ -11,6 +13,12 @@ Built by [Future AGI](https://futureagi.com) | [Docs](https://docs.futureagi.com
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1XjOUlEwUk-S0nl8dBb16iZHgr-XpXsnp?usp=sharing)
 
+</div>
+
+---
+
+<div align="center">
+  <img src="opt-repo.gif" alt="agent-opt Demo" width="70%" />
 </div>
 
 ---
