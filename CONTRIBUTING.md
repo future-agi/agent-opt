@@ -16,7 +16,7 @@ Thanks for your interest in contributing. `agent-opt` is part of the [Future AGI
 
 ## Code of Conduct & CLA
 
-This project follows the [main repo's Contributing Guide](https://github.com/future-agi/future-agi/blob/main/CONTRIBUTING.md) — same Code of Conduct, same Contributor License Agreement. The CLA signs automatically on your first PR.
+This project follows the [main repo's Contributing Guide](https://github.com/future-agi/future-agi/blob/main/CONTRIBUTING.md): same Code of Conduct, same Contributor License Agreement. The CLA signs automatically on your first PR.
 
 ---
 

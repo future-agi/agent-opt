@@ -8,7 +8,7 @@ version = "0.1.0"
 authors = [
   { name = "Future AGI", email = "hello@futureagi.io" },
 ]
-description = "Close the loop — six prompt-optimization algorithms, any LLM, any metric. Part of the Future AGI open-source platform."
+description = "Close the loop: six prompt-optimization algorithms, any LLM, any metric. Part of the Future AGI open-source platform."
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"

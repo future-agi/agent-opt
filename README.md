@@ -1,12 +1,12 @@
 <div align="center">
 
 <a href="https://futureagi.com">
-  <img alt="Future AGI" src=".github/assets/logo.svg" height="64">
+  <img alt="Future AGI" src=".github/assets/Logo.png" height="64">
 </a>
 
 # agent-opt
 
-**Close the loop — six prompt-optimization algorithms, any LLM, any metric.**
+**Close the loop: six prompt-optimization algorithms, any LLM, any metric.**
 
 Part of the [Future AGI](https://github.com/future-agi/future-agi) open-source platform for making AI agents reliable.
 
@@ -33,9 +33,9 @@ Part of the [Future AGI](https://github.com/future-agi/future-agi) open-source p
 
 ## Why agent-opt?
 
-AI agents hallucinate because their prompts leak ambiguity into the model. You can patch one prompt by hand — you can't patch a hundred. `agent-opt` closes the loop: pick an algorithm, pick a metric, feed it a dataset, and it returns a prompt that wins against the one you wrote.
+Prompts are how ambiguity sneaks into an agent. You can tweak one by hand. You can't tweak a hundred, and you definitely can't re-tweak them every time the model behind them changes. `agent-opt` does the tweaking for you: pick an algorithm, pick a metric, feed it a dataset, and it returns a prompt that beats the one you wrote.
 
-Six algorithms, one API, plug in any LLM via LiteLLM, score against any of the 50+ metrics from [`ai-evaluation`](https://github.com/future-agi/ai-evaluation). Production traces feed back as training data.
+Six algorithms, one API. Plug in any LLM via LiteLLM. Score against any of the 50+ metrics from [`ai-evaluation`](https://github.com/future-agi/ai-evaluation), or write your own. Production traces feed back in as training data.
 
 <table>
 <tr>
@@ -48,7 +48,7 @@ Not one toy loop with six labels. Random Search, Bayesian (Optuna), **ProTeGi** 
 <td width="33%" valign="top">
 
 ### Any model, any metric
-LiteLLM under the hood — OpenAI, Anthropic, Gemini, Bedrock, Azure, Groq, self-hosted. Score with BLEU, ROUGE, embedding similarity, LLM-as-judge, or any of 50+ [`ai-evaluation`](https://github.com/future-agi/ai-evaluation) metrics. Or write your own.
+LiteLLM under the hood, so OpenAI, Anthropic, Gemini, Bedrock, Azure, Groq, and self-hosted all just work. Score with BLEU, ROUGE, embedding similarity, LLM-as-judge, or any of 50+ [`ai-evaluation`](https://github.com/future-agi/ai-evaluation) metrics. Or write your own.
 
 </td>
 <td width="33%" valign="top">
@@ -181,7 +181,7 @@ generator = LiteLLMGenerator(
 
 ### Evaluators
 
-Score a generated output. Three flavors — heuristic, LLM-as-judge, and the Future AGI platform's pre-built templates — all behind one `Evaluator` API.
+Score a generated output. Three flavors (heuristic, LLM-as-judge, and the Future AGI platform's pre-built templates), all behind one `Evaluator` API.
 
 ```python
 # Heuristic
@@ -287,7 +287,7 @@ export FI_SECRET_KEY="..."
 - **`agent-opt`** turns those scored traces into a better prompt.
 - The [Agent Command Center](https://docs.futureagi.com/docs/command-center) ships the new prompt behind an OpenAI-compatible endpoint.
 
-Use one SDK or all of them — each is independently packaged, Apache 2.0-licensed.
+Use one SDK or all of them. Each is independently packaged and Apache 2.0-licensed.
 
 ---
 
@@ -355,7 +355,7 @@ src/fi/opt/
 
 ## Contributing
 
-Bug fixes, new algorithms, new metrics, docs, examples — all welcome.
+Bug fixes, new algorithms, new metrics, docs, examples: all welcome.
 
 1. [Browse `good first issue`](https://github.com/future-agi/agent-opt/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 2. Read the [main repo Contributing Guide](https://github.com/future-agi/future-agi/blob/main/CONTRIBUTING.md) — same CLA, same workflow.
