@@ -1,7 +1,10 @@
 <div align="center">
 
 <a href="https://futureagi.com">
-  <img alt="Future AGI" src=".github/assets/Logo.png" height="64">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="Logo.png">
+    <img alt="Future AGI" src="Logo.png" width="100%">
+  </picture>
 </a>
 
 # agent-opt
@@ -59,6 +62,10 @@ Optimize against traces captured by [`traceAI`](https://github.com/future-agi/tr
 </td>
 </tr>
 </table>
+
+<div align="center">
+  <img alt="agent-opt — six prompt-optimization algorithms, any LLM, any metric" src="agent-opt-repo.gif" width="100%">
+</div>
 
 ---
 
