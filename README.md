@@ -360,6 +360,70 @@ src/fi/opt/
 
 ---
 
+
+## ❓ Frequently Asked Questions
+
+### What is agent-opt?
+
+Agent-opt is a prompt optimization library that automatically improves your agent prompts using six different algorithms. Instead of manually tweaking prompts, you pick an algorithm, a metric, feed it a dataset, and it returns an optimized prompt that outperforms your original.
+
+### Which optimization algorithms are available?
+
+Six algorithms are supported:
+- **Random Search**: Baseline exploration of the prompt space
+- **Bayesian (Optuna)**: Efficient search using probabilistic modeling
+- **ProTeGi**: Textual gradient-based optimization
+- **Meta-Prompt**: Uses meta-prompts to guide optimization
+- **PromptWizard**: Mutate-critique-refine cycle
+- **GEPA**: Evolutionary Pareto optimization for multi-objective scenarios
+
+### What LLM providers are supported?
+
+Agent-opt uses LiteLLM under the hood, so it supports any provider LiteLLM supports: OpenAI, Anthropic, Gemini, Bedrock, Azure, Groq, and self-hosted models. Just configure the appropriate API keys and model names.
+
+### How do I evaluate optimized prompts?
+
+Agent-opt integrates with [`ai-evaluation`](https://github.com/future-agi/ai-evaluation) which provides 50+ metrics including:
+- **Heuristic metrics**: BLEU, ROUGE, embedding similarity
+- **LLM-as-judge**: Use an LLM to score outputs against rubrics
+- **Platform metrics**: Integration with evaluation platforms
+
+You can also write custom metrics by implementing the evaluator interface.
+
+### Can I use agent-opt with my own dataset?
+
+Yes. Feed any dataset in the expected format — the library maps your data through configurable data mappers. Production traces from [`traceAI`](https://github.com/future-agi/traceAI) can also feed back as training data.
+
+### How is agent-opt different from manual prompt engineering?
+
+Manual prompt engineering works for one or two prompts. Agent-opt is designed for when you have many prompts that need to be optimized and re-optimized as models change. It automates the trial-and-error process, systematically exploring the prompt space and returning the best configuration for your specific metric.
+
+### Can I run agent-opt locally?
+
+Yes. Install via pip and run locally. You can also try the cloud version for free at [app.futureagi.com](https://app.futureagi.com/auth/jwt/register). A Google Colab notebook is also available for quick experimentation.
+
+### What Python version is required?
+
+Agent-opt supports Python 3.9+. Check the PyPI page for the latest version requirements.
+
+### How does the Future AGI loop work?
+
+The complete loop is:
+1. **Trace**: Capture production agent traces with [`traceAI`](https://github.com/future-agi/traceAI)
+2. **Optimize**: Use agent-opt to find the best prompt for your metric
+3. **Deploy**: Push the winning prompt through the [Agent Command Center](https://docs.futureagi.com/docs/command-center) gateway
+4. **Evaluate**: Score results with [`ai-evaluation`](https://github.com/future-agi/ai-evaluation)
+5. **Iterate**: Production traces feed back as new training data
+
+### Where can I get help?
+
+- **Real-time help**: [Discord](https://discord.gg/UjZ2gRT5p)
+- **Discussions**: [GitHub Discussions](https://github.com/orgs/future-agi/discussions)
+- **Documentation**: [docs.futureagi.com](https://docs.futureagi.com/docs/optimization)
+- **Blog**: [futureagi.com/blog](https://futureagi.com/blog)
+- **Support**: support@futureagi.com
+- **Security**: security@futureagi.com
+
 ## Contributing
 
 Bug fixes, new algorithms, new metrics, docs, examples: all welcome.
